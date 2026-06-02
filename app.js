@@ -416,8 +416,9 @@ function abrirRelatorio(){
         var eM=horaMin(en),siM=horaMin(si),alM=(sa&&re)?Math.max(0,horaMin(re)-horaMin(sa)):0;
         var tM=Math.max(0,siM-eM-alM);sT=minHora(tM);
         var espS=ds===5?17*60:18*60,espT=espS-8*60-60;
-        if(eM>480){var at=eM-480;tA+=at;sA=minHora(at);}
-        if(tM>espT){var ex=tM-espT;tE+=ex;sE=minHora(ex);}
+        var TOL=5;// Portaria 671/2021 - tolerancia 5 min
+if(eM>480+TOL){var at=eM-480;tA+=at;sA=minHora(at);}
+        if(tM>espT+TOL){var ex=tM-espT;tE+=ex;sE=minHora(ex);}
         if(!fds)tT+=tM;
       }
       html+='<tr class="'+(fds?'fds':'')+'"><td class="td-data">'+dataStr+'</td><td>'+dS[ds]+'</td>';
