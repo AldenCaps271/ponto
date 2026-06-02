@@ -10,6 +10,7 @@
 :root{--g:#C9A84C;--gd:#8a6f2e;--p:#111009;--c:#1c1a10;--c2:#252010;--b:rgba(201,168,76,.2);--b2:rgba(201,168,76,.4);--t:#f0ede6;--t2:#a8a49d}
 html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-system,sans-serif}
 .s{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}.s.on{display:flex}
+.bk{display:inline-block;font-size:11px;padding:3px 14px;border-radius:20px;background:rgba(201,168,76,.15);color:var(--g);margin:.5rem 0 1.5rem;letter-spacing:.08em}
 .ba{width:100%;max-width:420px;padding:11px;margin-top:8px;background:none;border:1px dashed var(--b2);border-radius:12px;color:var(--g);font-size:13px;cursor:pointer}
 #ts{gap:0}
 .home-logo{width:400px;height:400px;object-fit:cover;border-radius:50%;border:3px solid #C9A84C;display:block;margin:0 auto 2.5rem}
@@ -24,7 +25,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .bio-aviso .sub{font-size:13px;color:var(--t2);line-height:1.5}
 .bio-lista-titulo{font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;width:100%;max-width:420px;text-align:left}
 .bio-lista{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.bio-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--c);border:1px solid var(--b);border-radius:12px;cursor:pointer;width:100%}
+.bio-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--c);border:1px solid var(--b);border-radius:12px;cursor:pointer;width:100%;text-align:left}
 .bio-item:hover{border-color:var(--g)}
 .bio-item .av{width:44px;height:44px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:var(--p);flex-shrink:0}
 .bio-item .fn{font-size:15px;font-weight:600;color:var(--t)}
@@ -47,6 +48,8 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .mb svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .m1{background:#162210;border-color:#3B6D11;color:#7dcf3a}.m2{background:#221808;border-color:#C9A84C;color:#e8c86a}
 .m3{background:#0d1a22;border-color:#2e7ab0;color:#7fb8e0}.m4{background:#221010;border-color:#A32D2D;color:#f09595}
+.ck{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;background:currentColor;display:flex;align-items:center;justify-content:center}
+.ck svg{width:10px;height:10px;stroke:var(--p);stroke-width:2.5}
 .rs{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:1rem 1.25rem}
 .rstit{font-size:12px;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
 .rg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.ri{text-align:center}
@@ -88,23 +91,27 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .mbtns{display:flex;gap:8px}.mbtns button{flex:1;padding:10px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none}
 .bcnl{background:var(--c2);color:var(--t2)}.bok{background:var(--g);color:var(--p);font-weight:600}
 .merr{font-size:12px;color:#f09595;margin-bottom:8px;display:none}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tok{background:var(--g);color:var(--p)}.terr{background:#A32D2D;color:#f0ede6}
 .empty{text-align:center;padding:2rem;color:var(--t2);font-size:14px}
 </style>
 </head>
 <body>
+
 <div class="s on" id="ts">
   <div style="text-align:center">
     <img src="Logo%20Novo.png" alt="Alden Caps" class="home-logo">
   </div>
+  <span class="bk" id="bsetor" style="display:none">PONTO</span>
   <button class="btn-registrar" id="btn-registrar-ponto">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     Registrar Ponto
   </button>
+  <div class="ls" id="lista" style="display:none"></div>
   <button class="ba" id="btn-admin">&#9881; Painel administrativo</button>
 </div>
+
 <div id="sem-bio">
   <div class="bio-aviso">
     <div class="ico">&#9888;&#65039;</div>
@@ -115,6 +122,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
   <div class="bio-lista" id="bio-lista"></div>
   <button class="bio-fechar" id="bio-fechar">Cancelar</button>
 </div>
+
 <div class="s" id="tp" style="justify-content:flex-start">
   <div class="hd">
     <div class="hl" id="hini">AC</div>
@@ -141,6 +149,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
     </div>
   </div>
 </div>
+
 <div class="s" id="ta" style="justify-content:flex-start">
   <div class="hd">
     <div class="hl">AC</div>
@@ -179,6 +188,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
     </div>
   </div>
 </div>
+
 <div id="cam-modal">
   <div style="position:relative;display:flex;align-items:center;justify-content:center">
     <video id="cam-video" autoplay muted playsinline></video>
@@ -189,6 +199,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
   <button id="cam-btn">&#128247; Capturar</button>
   <button id="cam-fechar">Cancelar</button>
 </div>
+
 <div id="mod">
   <div class="mbox">
     <h3>Painel Admin</h3>
@@ -197,53 +208,68 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
     <div class="mbtns"><button class="bcnl" id="btn-cancel">Cancelar</button><button class="bok" id="btn-ok">Entrar</button></div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
-<script>
-(function(){
-  function init(){
-    var btn=document.getElementById('btn-registrar-ponto');
-    if(!btn)return;
-    btn.addEventListener('click',function(){
-      var f=JSON.parse(localStorage.getItem('funcionarios')||'[]');
-      var sf=f.filter(function(x){return !x.foto;});
-      var cm=document.getElementById('cam-modal');
-      if(cm){cm.style.display='flex';document.dispatchEvent(new CustomEvent('abrirReconhecimento'));}
-      if(sf.length>0){setTimeout(function(){showSemBio(sf);},600);}
-    });
-    var bf=document.getElementById('bio-fechar');
-    if(bf)bf.addEventListener('click',function(){
-      document.getElementById('sem-bio').style.display='none';
-      var v=document.getElementById('cam-video');
-      if(v&&v.srcObject){v.srcObject.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}
-      document.getElementById('cam-modal').style.display='none';
-    });
-  }
-  function showSemBio(sf){
-    var p=document.getElementById('sem-bio');
-    var l=document.getElementById('bio-lista');
-    l.innerHTML='';
-    sf.forEach(function(f){
-      var ini=f.nome.split(' ').map(function(x){return x[0];}).join('').substring(0,2).toUpperCase();
-      var b=document.createElement('button');
-      b.className='bio-item';
-      b.innerHTML='<div class="av">'+ini+'</div><div><div class="fn">'+f.nome+'</div><div class="fc">'+(f.cargo||'Colaborador')+'</div></div>';
-      b.addEventListener('click',function(){
-        document.getElementById('sem-bio').style.display='none';
-        var v=document.getElementById('cam-video');
-        if(v&&v.srcObject){v.srcObject.getTracks().forEach(function(t){t.stop();});v.srcObject=null;}
-        document.getElementById('cam-modal').style.display='none';
-        document.dispatchEvent(new CustomEvent('selecionarColaborador',{detail:f}));
-      });
-      l.appendChild(b);
-    });
-    p.style.display='flex';
-  }
-  var l=document.getElementById('lista');if(l)l.style.display='none';
-  var bs=document.getElementById('bsetor');if(bs)bs.style.display='none';
-  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){setTimeout(init,100);});}
-  else{setTimeout(init,100);}
-})();
-</script>
 <script src="app.js"></script>
+<script>
+// Novo fluxo: roda DEPOIS do app.js carregar
+window.addEventListener('load', function(){
+  var btnReg = document.getElementById('btn-registrar-ponto');
+  if(!btnReg) return;
+
+  btnReg.addEventListener('click', function(){
+    var NS = 'acponto_';
+    var funcs = JSON.parse(localStorage.getItem(NS+'funcs') || '[]');
+    var comFoto = funcs.filter(function(f){ return f.desc && f.desc.length > 0; });
+    var semFoto = funcs.filter(function(f){ return !f.desc || !f.desc.length; });
+
+    if(funcs.length === 0){
+      // Sem colaboradores — abre câmera normal
+      if(typeof abrirCamera === 'function'){
+        abrirCamera('reconhecimento', function(f){ if(f) ap(f.id); });
+      }
+      return;
+    }
+
+    if(comFoto.length > 0){
+      // Tem colaboradores com foto — abre câmera para reconhecimento
+      if(typeof abrirCamera === 'function'){
+        abrirCamera('reconhecimento', function(f){ if(f) ap(f.id); });
+      }
+      // Se também tem sem foto, mostra painel depois
+      if(semFoto.length > 0){
+        setTimeout(function(){ mostrarSemBio(semFoto); }, 700);
+      }
+    } else {
+      // Ninguém tem foto — mostra lista de todos
+      mostrarSemBio(funcs);
+    }
+  });
+
+  document.getElementById('bio-fechar').addEventListener('click', function(){
+    document.getElementById('sem-bio').style.display = 'none';
+    if(typeof fecharCamera === 'function') fecharCamera();
+  });
+});
+
+function mostrarSemBio(lista){
+  var painel = document.getElementById('sem-bio');
+  var ul = document.getElementById('bio-lista');
+  ul.innerHTML = '';
+  lista.forEach(function(f){
+    var ini = f.nome.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+    var btn = document.createElement('button');
+    btn.className = 'bio-item';
+    btn.innerHTML = '<div class="av">'+ini+'</div><div><div class="fn">'+f.nome+'</div><div class="fc">'+(f.cargo||'Colaborador')+'</div></div>';
+    btn.addEventListener('click', function(){
+      document.getElementById('sem-bio').style.display = 'none';
+      if(typeof fecharCamera === 'function') fecharCamera();
+      if(typeof ap === 'function') ap(f.id);
+    });
+    ul.appendChild(btn);
+  });
+  painel.style.display = 'flex';
+}
+</script>
 </body>
 </html>
