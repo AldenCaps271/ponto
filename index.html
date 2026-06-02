@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Alden Caps - Ponto</title>
@@ -11,7 +11,6 @@
 html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-system,sans-serif}
 .s{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}.s.on{display:flex}
 .lc{width:90px;height:90px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:2px solid var(--g)}
-.lc span{font-size:28px;font-weight:700;color:var(--p)}
 .tt{font-size:22px;font-weight:300;color:var(--g);text-align:center}
 .bk{display:inline-block;font-size:11px;padding:3px 14px;border-radius:20px;background:rgba(201,168,76,.15);color:var(--g);margin:.5rem 0 1.5rem;letter-spacing:.08em}
 .ls{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px}
@@ -53,14 +52,18 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .fl{display:flex;flex-direction:column;gap:8px}
 .fcard{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px}
 .fav{width:38px;height:38px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--p);flex-shrink:0}
-.brm{background:none;border:1px solid rgba(242,74,74,.3);border-radius:6px;color:#f09595;font-size:12px;padding:4px 10px;cursor:pointer;margin-left:auto}
+.brm{background:none;border:1px solid rgba(242,74,74,.3);border-radius:6px;color:#f09595;font-size:13px;padding:5px 8px;cursor:pointer;margin-left:4px}
+.bedt{background:none;border:1px solid var(--b2);border-radius:6px;color:var(--g);font-size:13px;padding:5px 8px;cursor:pointer;margin-left:auto}
 .fadd{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:1rem;margin-top:1rem}
 .fadd h4{font-size:13px;font-weight:500;margin-bottom:12px;color:var(--g)}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .fr input{padding:9px 10px;background:var(--p);border:1px solid var(--b);border-radius:8px;color:var(--t);font-size:13px;width:100%}
 .bs{width:100%;padding:10px;background:var(--g);color:var(--p);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.bs2{width:100%;padding:10px;background:none;color:var(--t2);border:1px solid var(--b);border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px}
 .info-b{background:var(--c);border-left:3px solid var(--g);border-radius:10px;padding:12px 14px;margin-bottom:1rem;font-size:13px;line-height:1.6;color:var(--t2)}
 .info-b strong{color:var(--g)}
+.edit-box{background:var(--c2);border:1px solid var(--b2);border-radius:10px;padding:1rem;margin-top:1rem;display:none}
+.edit-box h4{font-size:13px;font-weight:500;margin-bottom:10px;color:var(--g)}
 #mod{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:1rem}
 .mbox{background:var(--c);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:100%;max-width:300px}
 .mbox h3{font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--g)}
@@ -72,99 +75,111 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tok{background:var(--g);color:var(--p)}.terr{background:#A32D2D;color:#f0ede6}
 .empty{text-align:center;padding:2rem;color:var(--t2);font-size:14px}
+.btn-rel{width:100%;padding:11px;margin-top:8px;background:rgba(201,168,76,.1);border:1px solid var(--b2);border-radius:12px;color:var(--g);font-size:13px;cursor:pointer;font-weight:600}
+.btn-rel:hover{background:rgba(201,168,76,.2)}
 </style>
 </head>
 <body>
 <div class="s on" id="ts">
-  <div style="text-align:center;margin-bottom:2rem">
-    <img src="Logo%20Novo.png" alt="Alden Caps" style="width:120px;height:120px;object-fit:cover;border-radius:50%;border:2px solid #C9A84C;display:block;margin:0 auto 10px">
-    <span class="bk" id="bsetor">PONTO</span>
-  </div>
-  <div class="ls" id="lista"></div>
-  <button class="ba" id="btn-admin">&#9881; Painel administrativo</button>
+<div style="text-align:center;margin-bottom:2rem">
+<img src="Logo%20Novo.png" alt="Alden Caps" style="width:120px;height:120px;object-fit:cover;border-radius:50%;border:2px solid #C9A84C;display:block;margin:0 auto 10px">
+<span class="bk" id="bsetor">PONTO</span>
+</div>
+<div class="ls" id="lista"></div>
+<button class="ba" id="btn-admin">&#9881; Painel administrativo</button>
 </div>
 <div class="s" id="tp" style="justify-content:flex-start">
-  <div class="hd">
-    <div class="hl" id="hini">AC</div>
-    <div class="hi"><div class="hn" id="pnome">-</div><div class="hc" id="pcargo">-</div></div>
-    <div class="sy"><div class="dt da" id="sdot"></div><span id="stxt">-</span></div>
-    <button class="bv" id="btn-voltar1">&#8592; Voltar</button>
-  </div>
-  <div class="pb">
-    <div class="rh"><div class="rt" id="rel">00:00:00</div><div class="rd" id="red"></div></div>
-    <div class="mg">
-      <button class="mb m1" id="bENTRADA">
-        <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Entrada<span class="hr" id="hENTRADA"></span>
-      </button>
-      <button class="mb m2" id="bSAIDA_ALMOCO">
-        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-        Saida Almoco<span class="hr" id="hSAIDA_ALMOCO"></span>
-      </button>
-      <button class="mb m3" id="bRETORNO_ALMOCO">
-        <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-5.36L1 10"/></svg>
-        Retorno<span class="hr" id="hRETORNO_ALMOCO"></span>
-      </button>
-      <button class="mb m4" id="bSAIDA">
-        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Saida<span class="hr" id="hSAIDA"></span>
-      </button>
-    </div>
-    <div class="rs">
-      <div class="rstit">Registros de hoje</div>
-      <div class="rg">
-        <div class="ri"><div class="rl">Entrada</div><div class="rv" id="rENTRADA">-</div></div>
-        <div class="ri"><div class="rl">S.Almoco</div><div class="rv" id="rSAIDA_ALMOCO">-</div></div>
-        <div class="ri"><div class="rl">Retorno</div><div class="rv" id="rRETORNO_ALMOCO">-</div></div>
-        <div class="ri"><div class="rl">Saida</div><div class="rv" id="rSAIDA">-</div></div>
-      </div>
-    </div>
-  </div>
+<div class="hd">
+<div class="hl" id="hini">AC</div>
+<div class="hi"><div class="hn" id="pnome">-</div><div class="hc" id="pcargo">-</div></div>
+<div class="sy"><div class="dt da" id="sdot"></div><span id="stxt">-</span></div>
+<button class="bv" id="btn-voltar1">&#8592; Voltar</button>
+</div>
+<div class="pb">
+<div class="rh"><div class="rt" id="rel">00:00:00</div><div class="rd" id="red"></div></div>
+<div class="mg">
+<button class="mb m1" id="bENTRADA">
+<svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+Entrada<span class="hr" id="hENTRADA"></span>
+</button>
+<button class="mb m2" id="bSAIDA_ALMOCO">
+<svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 010 8h-1"/><path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+Saida Almoco<span class="hr" id="hSAIDA_ALMOCO"></span>
+</button>
+<button class="mb m3" id="bRETORNO_ALMOCO">
+<svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 102.13-5.36L1 10"/></svg>
+Retorno<span class="hr" id="hRETORNO_ALMOCO"></span>
+</button>
+<button class="mb m4" id="bSAIDA">
+<svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+Saida<span class="hr" id="hSAIDA"></span>
+</button>
+</div>
+<div class="rs">
+<div class="rstit">Registros de hoje</div>
+<div class="rg">
+<div class="ri"><div class="rl">Entrada</div><div class="rv" id="rENTRADA">-</div></div>
+<div class="ri"><div class="rl">S.Almoco</div><div class="rv" id="rSAIDA_ALMOCO">-</div></div>
+<div class="ri"><div class="rl">Retorno</div><div class="rv" id="rRETORNO_ALMOCO">-</div></div>
+<div class="ri"><div class="rl">Saida</div><div class="rv" id="rSAIDA">-</div></div>
+</div>
+</div>
+</div>
 </div>
 <div class="s" id="ta" style="justify-content:flex-start">
-  <div class="hd">
-    <div class="hl">AC</div>
-    <div class="hi"><div class="hn">Painel Admin</div><div class="hc" id="adm-setor">Alden Caps</div></div>
-    <button class="bv" id="btn-voltar2">&#8592; Voltar</button>
-  </div>
-  <div class="ab">
-    <div class="tabs">
-      <button class="tab on" id="tab-f">Funcionarios</button>
-      <button class="tab" id="tab-c">Config.</button>
-    </div>
-    <div class="pan on" id="pf">
-      <div class="info-b">Cada marcacao vai para <strong>Ponto Alden Caps</strong> no Google Sheets em tempo real.</div>
-      <div class="fl" id="adml"></div>
-      <div class="fadd">
-        <h4>+ Adicionar funcionario</h4>
-        <div class="fr"><input type="text" id="fnome" placeholder="Nome completo"><input type="text" id="fcargo" placeholder="Cargo (opcional)"></div>
-        <button class="bs" id="btn-add">Salvar</button>
-      </div>
-    </div>
-    <div class="pan" id="pc">
-      <div class="fadd" style="margin-top:0">
-        <h4>Configuracoes</h4>
-        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="csetor" placeholder="Nome do setor"></div>
-        <div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha" placeholder="Nova senha"></div>
-        <button class="bs" id="btn-salvarc">Salvar</button>
-      </div>
-      <div class="fadd" style="margin-top:10px">
-        <h4 style="color:#f09595">Perigo</h4>
-        <button class="bs" style="background:#A32D2D;color:#fff;margin-top:0" id="btn-reset">Apagar tudo</button>
-      </div>
-    </div>
-  </div>
+<div class="hd">
+<div class="hl">AC</div>
+<div class="hi"><div class="hn">Painel Admin</div><div class="hc" id="adm-setor">Alden Caps</div></div>
+<button class="bv" id="btn-voltar2">&#8592; Voltar</button>
+</div>
+<div class="ab">
+<div class="tabs">
+<button class="tab on" id="tab-f">Funcionarios</button>
+<button class="tab" id="tab-c">Config.</button>
+</div>
+<div class="pan on" id="pf">
+<div class="info-b">Cada marcacao vai para <strong>Ponto Alden Caps</strong> no Google Sheets em tempo real.</div>
+<div class="fl" id="adml"></div>
+
+<div class="edit-box" id="edit-box">
+<h4>&#9998; Editar Colaborador</h4>
+<div class="fr"><input type="text" id="enome" placeholder="Nome completo"><input type="text" id="ecargo" placeholder="Cargo (opcional)"></div>
+<button class="bs" id="btn-salvar-edit">Salvar alteracoes</button>
+<button class="bs2" id="btn-cancelar-edit">Cancelar</button>
+</div>
+
+<div class="fadd">
+<h4>+ Adicionar colaborador</h4>
+<div class="fr"><input type="text" id="fnome" placeholder="Nome completo"><input type="text" id="fcargo" placeholder="Cargo (opcional)"></div>
+<button class="bs" id="btn-add">Salvar</button>
+</div>
+
+<button class="btn-rel" id="btn-relatorio">&#128438; Gerar Relatorio Mensal</button>
+</div>
+<div class="pan" id="pc">
+<div class="fadd" style="margin-top:0">
+<h4>Configuracoes</h4>
+<div class="fr" style="grid-template-columns:1fr"><input type="text" id="csetor" placeholder="Nome do setor"></div>
+<div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha" placeholder="Nova senha (min 4 chars)"></div>
+<button class="bs" id="btn-salvarc">Salvar</button>
+</div>
+<div class="fadd" style="margin-top:10px">
+<h4 style="color:#f09595">Zona de Perigo</h4>
+<button class="bs" style="background:#A32D2D;color:#fff;margin-top:0" id="btn-reset">Apagar todos os dados</button>
+</div>
+</div>
+</div>
 </div>
 <div id="mod" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:1rem">
-  <div class="mbox">
-    <h3>Painel Admin</h3>
-    <div class="merr" id="merr">Senha incorreta</div>
-    <input type="password" id="msenha" placeholder="Senha">
-    <div class="mbtns">
-      <button class="bcnl" id="btn-cancel">Cancelar</button>
-      <button class="bok" id="btn-ok">Entrar</button>
-    </div>
-  </div>
+<div class="mbox">
+<h3>Painel Admin</h3>
+<div class="merr" id="merr">Senha incorreta</div>
+<input type="password" id="msenha" placeholder="Senha">
+<div class="mbtns">
+<button class="bcnl" id="btn-cancel">Cancelar</button>
+<button class="bok" id="btn-ok">Entrar</button>
+</div>
+</div>
 </div>
 <div class="toast" id="toast"></div>
 <script src="app.js"></script>
