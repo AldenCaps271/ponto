@@ -353,35 +353,63 @@ function abrirRelatorio(){
   var nM=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var dS=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
   var tMes=nM[mes]+' '+ano;
+  var diasNoMes=new Date(ano,mes+1,0).getDate();
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatorio '+tMes+'</title>';
-  html+='<style>body{font-family:Arial,sans-serif;margin:0;padding:20px;background:#fff;color:#333}';
-  html+='.topo{text-align:center;margin-bottom:20px}.topo h1{color:#C9A84C;margin:0;font-size:22px}.topo p{color:#888;font-size:13px;margin:4px 0}';
-  html+='.bloco{margin-bottom:30px;border:1px solid #ccc;border-radius:8px;overflow:hidden;page-break-inside:avoid}';
-  html+='.bloco-header{background:#1c1a10;color:#C9A84C;padding:10px 14px;font-weight:bold;font-size:13px;display:flex;align-items:center;gap:10px}';
-  html+='.bloco-header img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #C9A84C}';
-  html+='table{width:100%;border-collapse:collapse;font-size:11px}';
-  html+='th{background:#f5f0e8;color:#333;padding:6px;text-align:center;border-bottom:2px solid #C9A84C}';
-  html+='td{padding:5px 6px;text-align:center;border-bottom:1px solid #eee}';
-  html+='.fds{background:#f0ece0;color:#aaa;font-style:italic}';
-  html+='.totais{background:#2d2a1a;color:#C9A84C;font-weight:bold}';
-  html+='.atraso{color:#c0392b;font-weight:bold}.extra{color:#27ae60;font-weight:bold}';
-  html+='.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:30px;padding:16px 20px;border-top:1px solid #eee}';
-  html+='.assin-campo{margin-top:30px;border-top:1px solid #333;padding-top:4px;text-align:center;font-size:10px;color:#888}';
-  html+='.assin-label{font-size:11px;color:#666;margin-bottom:0}';
-  html+='@media print{.btn-print{display:none}body{padding:10px}}</style></head><body>';
-  html+='<div class="topo"><h1>ALDEN CAPS — FOLHA DE PONTO</h1><p>Periodo: '+tMes+'</p></div>';
-  var temDados=false;
+  html+='<style>';
+  html+='*{box-sizing:border-box;margin:0;padding:0}';
+  html+='body{font-family:Arial,sans-serif;background:#fff;color:#333;font-size:11px}';
+  html+='.pagina{width:210mm;min-height:297mm;padding:10mm 12mm;page-break-after:always;display:flex;flex-direction:column}';
+  html+='.pagina:last-of-type{page-break-after:avoid}';
+  html+='.topo{text-align:center;margin-bottom:6px;border-bottom:2px solid #C9A84C;padding-bottom:6px}';
+  html+='.topo h1{color:#C9A84C;font-size:16px;margin:0}';
+  html+='.topo p{color:#888;font-size:10px;margin:2px 0}';
+  html+='.info-func{display:flex;align-items:center;gap:10px;background:#1c1a10;color:#C9A84C;padding:8px 10px;border-radius:6px;margin-bottom:6px}';
+  html+='.info-func img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #C9A84C;flex-shrink:0}';
+  html+='.info-func .nome{font-size:13px;font-weight:bold}';
+  html+='.info-func .cargo{font-size:10px;color:#e8c86a}';
+  html+='table{width:100%;border-collapse:collapse;flex:1}';
+  html+='thead tr{background:#2d2a1a}';
+  html+='thead th{color:#C9A84C;padding:5px 4px;text-align:center;font-size:10px;border:1px solid #444}';
+  html+='tbody tr{height:22px}';
+  html+='tbody tr:nth-child(even){background:#fafafa}';
+  html+='tbody tr.fds{background:#f0ece0;color:#aaa;font-style:italic}';
+  html+='tbody td{padding:3px 4px;text-align:center;border:1px solid #ddd;font-size:10px}';
+  html+='.td-data{text-align:left;font-weight:500;padding-left:6px}';
+  html+='.atraso{color:#c0392b;font-weight:bold}';
+  html+='.extra{color:#27ae60;font-weight:bold}';
+  html+='.totais-row td{background:#2d2a1a;color:#C9A84C;font-weight:bold;border:1px solid #444;padding:5px 4px}';
+  html+='.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:12px 0 0 0;margin-top:8px;border-top:1px solid #ddd}';
+  html+='.assin-campo{margin-top:28px;border-top:1px solid #333;padding-top:3px;text-align:center;font-size:9px;color:#888}';
+  html+='.assin-label{font-size:10px;color:#666}';
+  html+='@media print{body{margin:0}.pagina{padding:8mm 10mm}button{display:none}}';
+  html+='</style></head><body>';
+
   funcs.forEach(function(f){
-    var rf=regs.filter(function(r){var d=new Date(r.data+'T12:00:00');return r.fid===f.id&&d.getMonth()===mes&&d.getFullYear()===ano;});
-    if(!rf.length)return;
-    temDados=true;
-    var dm={};rf.forEach(function(r){if(!dm[r.data])dm[r.data]={};dm[r.data][r.tipo]=r.hora;});
+    // Construir mapa de registros do mes
+    var rf=regs.filter(function(r){
+      var d=new Date(r.data+'T12:00:00');
+      return r.fid===f.id&&d.getMonth()===mes&&d.getFullYear()===ano;
+    });
+    var dm={};
+    rf.forEach(function(r){if(!dm[r.data])dm[r.data]={};dm[r.data][r.tipo]=r.hora;});
+
     var tT=0,tA=0,tE=0;
     var fotoTag=f.foto?'<img src="'+f.foto+'" />':'';
-    html+='<div class="bloco"><div class="bloco-header">'+fotoTag+f.nome+' &nbsp;|&nbsp; '+(f.cargo||'Colaborador')+'</div>';
-    html+='<table><tr><th>Data</th><th>Dia</th><th>Entrada</th><th>S.Almoco</th><th>Retorno</th><th>Saida</th><th>Trabalhado</th><th>Atraso</th><th>H.Extras</th></tr>';
-    Object.keys(dm).sort().forEach(function(dt,i){
-      var r=dm[dt],d=new Date(dt+'T12:00:00'),ds=d.getDay(),fds=ds===0||ds===6;
+
+    html+='<div class="pagina">';
+    html+='<div class="topo"><h1>ALDEN CAPS — FOLHA DE PONTO</h1><p>Periodo: '+tMes+'</p></div>';
+    html+='<div class="info-func">'+fotoTag+'<div><div class="nome">'+f.nome+'</div><div class="cargo">'+(f.cargo||'Colaborador')+'</div></div></div>';
+    html+='<table>';
+    html+='<thead><tr><th style="width:70px">Data</th><th style="width:30px">Dia</th><th>Entrada</th><th>S.Almoco</th><th>Retorno</th><th>Saida</th><th>Trabalhado</th><th>Atraso</th><th>H.Extras</th></tr></thead>';
+    html+='<tbody>';
+
+    // Iterar todos os dias do mês
+    for(var d=1;d<=diasNoMes;d++){
+      var dataStr=ano+'-'+String(mes+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      var dt=new Date(dataStr+'T12:00:00');
+      var ds=dt.getDay();
+      var fds=ds===0||ds===6;
+      var r=dm[dataStr]||{};
       var en=r['ENTRADA']||'',sa=r['SAIDA_ALMOCO']||'',re=r['RETORNO_ALMOCO']||'',si=r['SAIDA']||'';
       var sT='-',sA='-',sE='-';
       if(en&&si){
@@ -392,15 +420,25 @@ function abrirRelatorio(){
         if(tM>espT){var ex=tM-espT;tE+=ex;sE=minHora(ex);}
         if(!fds)tT+=tM;
       }
-      html+='<tr class="'+(fds?'fds':'')+'"><td>'+dt+'</td><td>'+dS[ds]+'</td><td>'+(en||'-')+'</td><td>'+(sa||'-')+'</td><td>'+(re||'-')+'</td><td>'+(si||'-')+'</td><td>'+sT+'</td>';
-      html+='<td class="'+(sA!=='-'?'atraso':'')+'">'+sA+'</td><td class="'+(sE!=='-'?'extra':'')+'">'+sE+'</td></tr>';
-    });
-    html+='<tr class="totais"><td colspan="6">TOTAIS DO MES</td><td>'+minHora(tT)+'</td><td>'+minHora(tA)+'</td><td>'+minHora(tE)+'</td></tr>';
-    html+='</table><div class="assinaturas"><div><p class="assin-label">Assinatura do Colaborador</p><div class="assin-campo">'+f.nome+'</div></div>';
-    html+='<div><p class="assin-label">Assinatura do Responsavel</p><div class="assin-campo">Gestor Responsavel</div></div></div></div>';
+      html+='<tr class="'+(fds?'fds':'')+'"><td class="td-data">'+dataStr+'</td><td>'+dS[ds]+'</td>';
+      html+='<td>'+(en||'-')+'</td><td>'+(sa||'-')+'</td><td>'+(re||'-')+'</td><td>'+(si||'-')+'</td>';
+      html+='<td>'+sT+'</td>';
+      html+='<td class="'+(sA!=='-'?'atraso':'')+'">'+sA+'</td>';
+      html+='<td class="'+(sE!=='-'?'extra':'')+'">'+sE+'</td></tr>';
+    }
+
+    html+='<tr class="totais-row"><td colspan="6" style="text-align:center">TOTAIS DO MES</td>';
+    html+='<td>'+minHora(tT)+'</td><td>'+minHora(tA)+'</td><td>'+minHora(tE)+'</td></tr>';
+    html+='</tbody></table>';
+
+    html+='<div class="assinaturas">';
+    html+='<div><p class="assin-label">Assinatura do Colaborador</p><div class="assin-campo">'+f.nome+'</div></div>';
+    html+='<div><p class="assin-label">Assinatura do Responsavel</p><div class="assin-campo">Gestor Responsavel</div></div>';
+    html+='</div></div>';
   });
-  if(!temDados)html+='<p style="text-align:center;color:#aaa;padding:40px">Nenhum registro encontrado para '+tMes+'</p>';
-  html+='<div style="text-align:center;margin:20px"><button class="btn-print" onclick="window.print()" style="background:#C9A84C;color:#1c1a10;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer">&#128438; Imprimir / Salvar PDF</button></div>';
+
+  if(!funcs.length)html+='<div class="pagina"><p style="text-align:center;color:#aaa;padding:40px">Nenhum colaborador cadastrado</p></div>';
+  html+='<div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#C9A84C;color:#1c1a10;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer">&#128438; Imprimir / Salvar PDF</button></div>';
   html+='</body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();
 }
