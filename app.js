@@ -1,4 +1,4 @@
-var SU='https://script.google.com/macros/s/AKfycbzpQGGXwWVPfnCt9hnC89WlJddybBzFKIUE0mcwzJZyM2fJSXHYK1H7abIfkGjXi9Ow/exec';
+var SU='https://script.google.com/macros/s/AKfycbwc9l7LgctUalF0MEEz0hhzdENl2jH8GBVXhM6Ilu83t4CaqczLlVUcdh5eD-d6J444/exec';
 var NS='acponto_';
 var DB={
   getCfg:function(){return JSON.parse(localStorage.getItem(NS+'cfg')||'{"setor":"Alden Caps","senha":"1234"}');},
