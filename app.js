@@ -8,6 +8,30 @@ var DB={
   setFuncs:function(v){localStorage.setItem(NS+'funcs',JSON.stringify(v));},
   setRegs:function(v){localStorage.setItem(NS+'regs',JSON.stringify(v));}
 };
+
+// ===== SYNC COLABORADORES =====
+function sincronizarColaboradores(){
+  var funcs=DB.getFuncs();
+  fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({acao:'salvarColaboradores',colaboradores:funcs})
+  }).catch(function(){});
+}
+
+function restaurarColaboradores(cb){
+  fetch(SU+'?acao=getColaboradores')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.ok && data.colaboradores && data.colaboradores.length>0){
+        var local=DB.getFuncs();
+        if(local.length===0){
+          DB.setFuncs(data.colaboradores);
+          toast('Colaboradores restaurados da nuvem!');
+        }
+      }
+      if(cb)cb();
+    }).catch(function(){if(cb)cb();});
+}
+
 var fa=null, feditId=null, camStream=null, faceApiCarregado=false, modoCamera=null;
 
 // ===== FACE-API =====
@@ -313,7 +337,7 @@ function salvarEdit(){
   if(!nome){toast('Informe o nome',1);return;}
   var funcs=DB.getFuncs();
   for(var i=0;i<funcs.length;i++){if(funcs[i].id===feditId){funcs[i].nome=nome;funcs[i].cargo=cargo;break;}}
-  DB.setFuncs(funcs);fecharEdit();radAdm();rl();toast('Atualizado!');
+  DB.setFuncs(funcs);fecharEdit();radAdm();rl();toast('Atualizado!');sincronizarColaboradores();
 }
 
 function addF(){
@@ -323,12 +347,12 @@ function addF(){
   funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,foto:null,desc:null});
   DB.setFuncs(funcs);
   document.getElementById('fnome').value='';document.getElementById('fcargo').value='';
-  radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em 📷');
+  radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em 📷');sincronizarColaboradores();
 }
 function rmF(id){
   if(!confirm('Remover colaborador?'))return;
   DB.setFuncs(DB.getFuncs().filter(function(f){return f.id!==id;}));
-  radAdm();rl();toast('Removido');
+  radAdm();rl();toast('Removido');sincronizarColaboradores();
 }
 function salvarC(){
   var cfg=DB.getCfg(),s=document.getElementById('csetor').value.trim(),p=document.getElementById('csenha').value.trim();
@@ -448,7 +472,7 @@ window.addEventListener('DOMContentLoaded',function(){
   var cfg=DB.getCfg();
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
   document.getElementById('adm-setor').textContent=cfg.setor;
-  rl();setInterval(tick,1000);tick();ms('ts');
+  restaurarColaboradores(function(){rl();});setInterval(tick,1000);tick();ms('ts');
   document.getElementById('btn-admin').addEventListener('click',abrirAdmin);
   document.getElementById('btn-voltar1').addEventListener('click',voltar);
   document.getElementById('btn-voltar2').addEventListener('click',voltar);
