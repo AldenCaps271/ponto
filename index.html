@@ -10,8 +10,6 @@
 :root{--g:#C9A84C;--gd:#8a6f2e;--p:#111009;--c:#1c1a10;--c2:#252010;--b:rgba(201,168,76,.2);--b2:rgba(201,168,76,.4);--t:#f0ede6;--t2:#a8a49d}
 html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-system,sans-serif}
 .s{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1rem}.s.on{display:flex}
-.lc{width:90px;height:90px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;border:2px solid var(--g)}
-.tt{font-size:22px;font-weight:300;color:var(--g);text-align:center}
 .bk{display:inline-block;font-size:11px;padding:3px 14px;border-radius:20px;background:rgba(201,168,76,.15);color:var(--g);margin:.5rem 0 1.5rem;letter-spacing:.08em}
 .ls{width:100%;max-width:420px;display:flex;flex-direction:column;gap:8px}
 .fb{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--c);border:1px solid var(--b);border-radius:12px;cursor:pointer;text-align:left;width:100%}
@@ -50,10 +48,11 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .tab.on{background:var(--g);color:var(--p);font-weight:600}
 .pan{display:none}.pan.on{display:block}
 .fl{display:flex;flex-direction:column;gap:8px}
-.fcard{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.fcard{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
 .fav{width:38px;height:38px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--p);flex-shrink:0}
-.brm{background:none;border:1px solid rgba(242,74,74,.3);border-radius:6px;color:#f09595;font-size:13px;padding:5px 8px;cursor:pointer;margin-left:4px}
+.brm{background:none;border:1px solid rgba(242,74,74,.3);border-radius:6px;color:#f09595;font-size:13px;padding:5px 8px;cursor:pointer;margin-left:2px}
 .bedt{background:none;border:1px solid var(--b2);border-radius:6px;color:var(--g);font-size:13px;padding:5px 8px;cursor:pointer;margin-left:auto}
+.bcam{background:rgba(201,168,76,.1);border:1px solid var(--b2);border-radius:6px;color:var(--g);font-size:13px;padding:5px 8px;cursor:pointer}
 .fadd{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:1rem;margin-top:1rem}
 .fadd h4{font-size:13px;font-weight:500;margin-bottom:12px;color:var(--g)}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
@@ -64,6 +63,16 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .info-b strong{color:var(--g)}
 .edit-box{background:var(--c2);border:1px solid var(--b2);border-radius:10px;padding:1rem;margin-top:1rem;display:none}
 .edit-box h4{font-size:13px;font-weight:500;margin-bottom:10px;color:var(--g)}
+.btn-rel{width:100%;padding:11px;margin-top:8px;background:rgba(201,168,76,.1);border:1px solid var(--b2);border-radius:12px;color:var(--g);font-size:13px;cursor:pointer;font-weight:600}
+/* MODAL CAMERA */
+#cam-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px}
+#cam-video{width:100%;max-width:400px;border-radius:12px;border:2px solid var(--g);background:#000}
+#cam-canvas{display:none}
+#cam-status{color:var(--g);font-size:14px;font-weight:500;text-align:center}
+#cam-btn{padding:12px 32px;background:var(--g);color:var(--p);border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;display:none}
+#cam-fechar{padding:8px 24px;background:none;color:var(--t2);border:1px solid var(--b);border-radius:8px;font-size:13px;cursor:pointer}
+.cam-face-guide{width:200px;height:200px;border:2px dashed rgba(201,168,76,.5);border-radius:50%;position:absolute;pointer-events:none}
+/* MODAL SENHA */
 #mod{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:1rem}
 .mbox{background:var(--c);border:1px solid var(--b2);border-radius:14px;padding:1.5rem;width:100%;max-width:300px}
 .mbox h3{font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--g)}
@@ -75,11 +84,11 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tok{background:var(--g);color:var(--p)}.terr{background:#A32D2D;color:#f0ede6}
 .empty{text-align:center;padding:2rem;color:var(--t2);font-size:14px}
-.btn-rel{width:100%;padding:11px;margin-top:8px;background:rgba(201,168,76,.1);border:1px solid var(--b2);border-radius:12px;color:var(--g);font-size:13px;cursor:pointer;font-weight:600}
-.btn-rel:hover{background:rgba(201,168,76,.2)}
 </style>
 </head>
 <body>
+
+<!-- TELA PRINCIPAL -->
 <div class="s on" id="ts">
 <div style="text-align:center;margin-bottom:2rem">
 <img src="Logo%20Novo.png" alt="Alden Caps" style="width:120px;height:120px;object-fit:cover;border-radius:50%;border:2px solid #C9A84C;display:block;margin:0 auto 10px">
@@ -88,6 +97,8 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 <div class="ls" id="lista"></div>
 <button class="ba" id="btn-admin">&#9881; Painel administrativo</button>
 </div>
+
+<!-- TELA PONTO -->
 <div class="s" id="tp" style="justify-content:flex-start">
 <div class="hd">
 <div class="hl" id="hini">AC</div>
@@ -126,6 +137,8 @@ Saida<span class="hr" id="hSAIDA"></span>
 </div>
 </div>
 </div>
+
+<!-- TELA ADMIN -->
 <div class="s" id="ta" style="justify-content:flex-start">
 <div class="hd">
 <div class="hl">AC</div>
@@ -134,26 +147,23 @@ Saida<span class="hr" id="hSAIDA"></span>
 </div>
 <div class="ab">
 <div class="tabs">
-<button class="tab on" id="tab-f">Funcionarios</button>
+<button class="tab on" id="tab-f">Colaboradores</button>
 <button class="tab" id="tab-c">Config.</button>
 </div>
 <div class="pan on" id="pf">
-<div class="info-b">Cada marcacao vai para <strong>Ponto Alden Caps</strong> no Google Sheets em tempo real.</div>
+<div class="info-b">&#128247; Cadastre o rosto de cada colaborador clicando em <strong>📷</strong> ao lado do nome. Isso ativa o reconhecimento facial.</div>
 <div class="fl" id="adml"></div>
-
 <div class="edit-box" id="edit-box">
 <h4>&#9998; Editar Colaborador</h4>
 <div class="fr"><input type="text" id="enome" placeholder="Nome completo"><input type="text" id="ecargo" placeholder="Cargo (opcional)"></div>
 <button class="bs" id="btn-salvar-edit">Salvar alteracoes</button>
 <button class="bs2" id="btn-cancelar-edit">Cancelar</button>
 </div>
-
 <div class="fadd">
 <h4>+ Adicionar colaborador</h4>
 <div class="fr"><input type="text" id="fnome" placeholder="Nome completo"><input type="text" id="fcargo" placeholder="Cargo (opcional)"></div>
 <button class="bs" id="btn-add">Salvar</button>
 </div>
-
 <button class="btn-rel" id="btn-relatorio">&#128438; Gerar Relatorio Mensal</button>
 </div>
 <div class="pan" id="pc">
@@ -170,7 +180,21 @@ Saida<span class="hr" id="hSAIDA"></span>
 </div>
 </div>
 </div>
-<div id="mod" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:50;align-items:center;justify-content:center;padding:1rem">
+
+<!-- MODAL CAMERA -->
+<div id="cam-modal">
+<div style="position:relative;display:flex;align-items:center;justify-content:center">
+<video id="cam-video" autoplay muted playsinline></video>
+<div class="cam-face-guide"></div>
+</div>
+<canvas id="cam-canvas"></canvas>
+<div id="cam-status">Iniciando camera...</div>
+<button id="cam-btn">&#128247; Capturar</button>
+<button id="cam-fechar">Cancelar</button>
+</div>
+
+<!-- MODAL SENHA ADMIN -->
+<div id="mod">
 <div class="mbox">
 <h3>Painel Admin</h3>
 <div class="merr" id="merr">Senha incorreta</div>
@@ -181,6 +205,7 @@ Saida<span class="hr" id="hSAIDA"></span>
 </div>
 </div>
 </div>
+
 <div class="toast" id="toast"></div>
 <script src="app.js"></script>
 </body>
