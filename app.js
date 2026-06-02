@@ -323,6 +323,7 @@ function abrirEdit(id){
   feditId=id;
   document.getElementById('enome').value=f.nome;
   document.getElementById('ecargo').value=f.cargo||'';
+  document.getElementById('eemail').value=f.email||'';
   document.getElementById('edit-box').style.display='block';
   document.getElementById('enome').focus();
 }
@@ -336,7 +337,7 @@ function salvarEdit(){
   var cargo=document.getElementById('ecargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
   var funcs=DB.getFuncs();
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===feditId){funcs[i].nome=nome;funcs[i].cargo=cargo;break;}}
+  var emailEdit=document.getElementById('eemail').value.trim();for(var i=0;i<funcs.length;i++){if(funcs[i].id===feditId){funcs[i].nome=nome;funcs[i].cargo=cargo;funcs[i].email=emailEdit;break;}}
   DB.setFuncs(funcs);fecharEdit();radAdm();rl();toast('Atualizado!');sincronizarColaboradores();
 }
 
@@ -344,7 +345,7 @@ function addF(){
   var nome=document.getElementById('fnome').value.trim(),cargo=document.getElementById('fcargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
   var funcs=DB.getFuncs();
-  funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,foto:null,desc:null});
+  var email=document.getElementById('femail').value.trim();funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,email:email,foto:null,desc:null});
   DB.setFuncs(funcs);
   document.getElementById('fnome').value='';document.getElementById('fcargo').value='';
   radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em 📷');sincronizarColaboradores();
