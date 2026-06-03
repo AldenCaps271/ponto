@@ -1,4 +1,4 @@
-var SU='https://script.google.com/macros/s/AKfycbwc9l7LgctUalF0MEEz0hhzdENl2jH8GBVXhM6Ilu83t4CaqczLlVUcdh5eD-d6J444/exec';
+var SU='https://script.google.com/macros/s/AKfycbz5P9vPvsAN5eQmvQmFRfltzp_k4J1VHmAh6mmO-haHF-YFKARPeW7VtFZ5gw1bmPOa/exec';
 
 // Config local (preferencias de UI apenas)
 var CFG={
