@@ -1,38 +1,37 @@
 var SU='https://script.google.com/macros/s/AKfycbwc9l7LgctUalF0MEEz0hhzdENl2jH8GBVXhM6Ilu83t4CaqczLlVUcdh5eD-d6J444/exec';
-var NS='acponto_';
-var DB={
-  getCfg:function(){return JSON.parse(localStorage.getItem(NS+'cfg')||'{"setor":"Alden Caps","senha":"1234"}');},
-  getFuncs:function(){return JSON.parse(localStorage.getItem(NS+'funcs')||'[]');},
-  getRegs:function(){return JSON.parse(localStorage.getItem(NS+'regs')||'[]');},
-  setCfg:function(v){localStorage.setItem(NS+'cfg',JSON.stringify(v));},
-  setFuncs:function(v){localStorage.setItem(NS+'funcs',JSON.stringify(v));},
-  setRegs:function(v){localStorage.setItem(NS+'regs',JSON.stringify(v));}
+
+// Config local (preferencias de UI apenas)
+var CFG={
+  get:function(){return JSON.parse(localStorage.getItem('acponto_cfg')||'{"setor":"Alden Caps","senha":"1234"}');},
+  set:function(v){localStorage.setItem('acponto_cfg',JSON.stringify(v));}
 };
 
-// ===== SYNC COLABORADORES =====
+// Cache em memoria - nada vai para o localStorage exceto config
+var _funcs=null;
+var _regsUser={};
+var fa=null,feditId=null,camStream=null,faceApiCarregado=false,modoCamera=null;
+
+// ===== API =====
+function apiGet(params,cb,errcb){
+  var url=SU+'?'+Object.keys(params).map(function(k){return k+'='+encodeURIComponent(params[k]);}).join('&');
+  fetch(url).then(function(r){return r.json();}).then(cb).catch(errcb||function(){});
+}
+function apiPost(data){
+  return fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).catch(function(){});
+}
+
+// ===== COLABORADORES =====
+function carregarFuncs(cb){
+  if(_funcs!==null){cb(_funcs);return;}
+  apiGet({acao:'getColaboradores'},function(data){
+    _funcs=data.ok?data.colaboradores:[];cb(_funcs);
+  },function(){_funcs=[];cb([]);});
+}
+function invalidarFuncs(){_funcs=null;}
 function sincronizarColaboradores(){
-  var funcs=DB.getFuncs();
-  fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({acao:'salvarColaboradores',colaboradores:funcs})
-  }).catch(function(){});
+  if(!_funcs)return;
+  apiPost({acao:'salvarColaboradores',colaboradores:_funcs});
 }
-
-function restaurarColaboradores(cb){
-  fetch(SU+'?acao=getColaboradores')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(data.ok && data.colaboradores && data.colaboradores.length>0){
-        var local=DB.getFuncs();
-        if(local.length===0){
-          DB.setFuncs(data.colaboradores);
-          toast('Colaboradores restaurados da nuvem!');
-        }
-      }
-      if(cb)cb();
-    }).catch(function(){if(cb)cb();});
-}
-
-var fa=null, feditId=null, camStream=null, faceApiCarregado=false, modoCamera=null;
 
 // ===== FACE-API =====
 function carregarFaceApi(cb){
@@ -49,7 +48,7 @@ function carregarFaceApi(cb){
   document.head.appendChild(s);
 }
 
-function abrirCamera(modo, onCaptura){
+function abrirCamera(modo,onCaptura){
   modoCamera=modo;
   var modal=document.getElementById('cam-modal');
   var status=document.getElementById('cam-status');
@@ -57,26 +56,20 @@ function abrirCamera(modo, onCaptura){
   modal.style.display='flex';
   status.textContent='Carregando reconhecimento facial...';
   btnCap.style.display='none';
-
   carregarFaceApi(function(){
     navigator.mediaDevices.getUserMedia({video:{width:640,height:480,facingMode:'user'}})
     .then(function(stream){
       camStream=stream;
       var video=document.getElementById('cam-video');
-      video.srcObject=stream;
-      video.play();
-      status.textContent= modo==='cadastro' ? 'Posicione o rosto e clique em Capturar' : 'Olhe para a camera...';
+      video.srcObject=stream;video.play();
+      status.textContent=modo==='cadastro'?'Posicione o rosto e clique em Capturar':'Olhe para a camera...';
       if(modo==='cadastro'){
         btnCap.style.display='block';
         btnCap.onclick=function(){capturarFoto(onCaptura);};
       } else {
-        // reconhecimento automatico
         setTimeout(function(){reconhecerRosto(onCaptura);},1500);
       }
-    }).catch(function(){
-      status.textContent='Erro: permita o acesso a camera';
-      toast('Permita o acesso a camera',1);
-    });
+    }).catch(function(){status.textContent='Erro: permita o acesso a camera';toast('Permita o acesso a camera',1);});
   });
 }
 
@@ -89,62 +82,44 @@ function fecharCamera(){
 function capturarFoto(cb){
   var video=document.getElementById('cam-video');
   var canvas=document.getElementById('cam-canvas');
-  canvas.width=video.videoWidth||320;
-  canvas.height=video.videoHeight||240;
+  canvas.width=video.videoWidth||320;canvas.height=video.videoHeight||240;
   canvas.getContext('2d').drawImage(video,0,0);
   document.getElementById('cam-status').textContent='Detectando rosto...';
-
-  faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-    .withFaceLandmarks(true).withFaceDescriptor()
-    .then(function(det){
-      if(!det){toast('Rosto nao detectado. Tente novamente.',1);document.getElementById('cam-status').textContent='Rosto nao encontrado. Tente novamente.';return;}
-      var foto=canvas.toDataURL('image/jpeg',0.7);
-      var desc=Array.from(det.descriptor);
-      fecharCamera();
-      cb(foto, desc);
-    }).catch(function(e){toast('Erro na deteccao',1);console.error(e);});
+  faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions())
+  .withFaceLandmarks(true).withFaceDescriptor()
+  .then(function(det){
+    if(!det){toast('Rosto nao detectado. Tente novamente.',1);document.getElementById('cam-status').textContent='Rosto nao encontrado. Tente novamente.';return;}
+    fecharCamera();cb(canvas.toDataURL('image/jpeg',0.7),Array.from(det.descriptor));
+  }).catch(function(e){toast('Erro na deteccao',1);console.error(e);});
 }
 
 function reconhecerRosto(cb){
   var video=document.getElementById('cam-video');
-  var funcs=DB.getFuncs().filter(function(f){return f.desc&&f.desc.length>0;});
-  if(!funcs.length){fecharCamera();toast('Nenhum colaborador com rosto cadastrado',1);return;}
-
+  var funcs=(_funcs||[]).filter(function(f){return f.desc&&f.desc.length>0;});
+  if(!funcs.length){fecharCamera();cb(null);return;}
   document.getElementById('cam-status').textContent='Reconhecendo...';
-  var labeledDescriptors=funcs.map(function(f){
-    return new faceapi.LabeledFaceDescriptors(f.id,[new Float32Array(f.desc)]);
-  });
-  var matcher=new faceapi.FaceMatcher(labeledDescriptors, 0.5);
-
-  faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-    .withFaceLandmarks(true).withFaceDescriptor()
-    .then(function(det){
-      if(!det){
-        document.getElementById('cam-status').textContent='Rosto nao reconhecido. Tente novamente.';
-        setTimeout(function(){reconhecerRosto(cb);},2000);
-        return;
-      }
-      var result=matcher.findBestMatch(det.descriptor);
-      if(result.label==='unknown'){
-        document.getElementById('cam-status').textContent='Pessoa nao reconhecida!';
-        setTimeout(function(){fecharCamera();toast('Rosto nao reconhecido',1);},1500);
-      } else {
-        var f=null;
-        var funcsAll=DB.getFuncs();
-        for(var i=0;i<funcsAll.length;i++){if(funcsAll[i].id===result.label){f=funcsAll[i];break;}}
-        document.getElementById('cam-status').textContent='Bem-vindo, '+( f?f.nome:'?')+'!';
-        setTimeout(function(){fecharCamera();cb(f);},800);
-      }
-    }).catch(function(e){
-      toast('Erro no reconhecimento',1);fecharCamera();console.error(e);
-    });
+  var labeled=funcs.map(function(f){return new faceapi.LabeledFaceDescriptors(f.id,[new Float32Array(f.desc)]);});
+  var matcher=new faceapi.FaceMatcher(labeled,0.5);
+  faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions())
+  .withFaceLandmarks(true).withFaceDescriptor()
+  .then(function(det){
+    if(!det){document.getElementById('cam-status').textContent='Olhe para a camera...';setTimeout(function(){reconhecerRosto(cb);},2000);return;}
+    var result=matcher.findBestMatch(det.descriptor);
+    if(result.label==='unknown'){
+      document.getElementById('cam-status').textContent='Nao reconhecido...';
+      setTimeout(function(){fecharCamera();cb(null);},800);
+    } else {
+      var f=(_funcs||[]).find(function(x){return x.id===result.label;})||null;
+      document.getElementById('cam-status').textContent='Bem-vindo, '+(f?f.nome:'')+'!';
+      setTimeout(function(){fecharCamera();cb(f);},800);
+    }
+  }).catch(function(e){fecharCamera();cb(null);console.error(e);});
 }
 
 // ===== UTILS =====
 function ms(id){document.querySelectorAll('.s').forEach(function(t){t.classList.toggle('on',t.id===id);});}
-function voltar(){fa=null;ms('ts');rl();}
+function voltar(){fa=null;_regsUser={};ms('ts');rl();}
 function toast(msg,e){var el=document.getElementById('toast');el.textContent=msg;el.className='toast show '+(e?'terr':'tok');setTimeout(function(){el.classList.remove('show');},2800);}
-
 function tick(){
   var n=new Date(),p=function(v){return String(v).padStart(2,'0');};
   var el=document.getElementById('rel');
@@ -157,57 +132,69 @@ function tick(){
 
 // ===== TELA PRINCIPAL =====
 function rl(){
-  var funcs=DB.getFuncs(),hoje=new Date().toISOString().slice(0,10);
   var el=document.getElementById('lista');
-  var cfg=DB.getCfg();
+  var cfg=CFG.get();
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
-  if(!funcs.length){el.innerHTML='<div class="empty">Nenhum colaborador ainda.<br>Painel Admin > Colaboradores</div>';return;}
+  el.innerHTML='<div class="empty">Carregando...</div>';
+  var hoje=new Date().toISOString().slice(0,10);
+  carregarFuncs(function(funcs){
+    if(!funcs.length){el.innerHTML='<div class="empty">Nenhum colaborador ainda.<br>Painel Admin > Colaboradores</div>';return;}
+    apiGet({acao:'getStatusHoje',data:hoje},function(data){
+      renderLista(funcs,data.ok?data.status:{});
+    },function(){renderLista(funcs,{});});
+  });
+}
+
+function renderLista(funcs,statusMap){
+  var el=document.getElementById('lista');
   el.innerHTML=funcs.map(function(f){
-    var r=DB.getRegs().filter(function(x){return x.fid===f.id&&x.data===hoje;});
-    var t=r.map(function(x){return x.tipo;});
+    var tipos=statusMap[f.id]||[];
     var s,c;
-    if(t.indexOf('SAIDA')>=0){s='Saiu';c='ok';}
-    else if(t.indexOf('ENTRADA')>=0){s='Presente';c='pres';}
+    if(tipos.indexOf('SAIDA')>=0){s='Saiu';c='ok';}
+    else if(tipos.indexOf('ENTRADA')>=0){s='Presente';c='pres';}
     else{s='Ausente';c='nd';}
     var ini=f.nome.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase();
-    var temFoto=f.foto?'url('+f.foto+')':'';
-    var avatar=temFoto?'<div class="av" style="background-image:'+temFoto+';background-size:cover;background-position:center"></div>':'<div class="av">'+ini+'</div>';
+    var avatar=f.foto?'<div class="av" style="background-image:url('+f.foto+');background-size:cover;background-position:center"></div>':'<div class="av">'+ini+'</div>';
     return '<button class="fb" data-id="'+f.id+'">'+avatar+'<div><div class="fn">'+f.nome+'</div><div class="fc">'+(f.cargo||'-')+'</div></div><span class="fst '+c+'">'+s+'</span></button>';
   }).join('');
   document.querySelectorAll('#lista .fb').forEach(function(btn){
-    btn.addEventListener('click',function(){iniciarReconhecimento(btn.dataset.id);});
+    btn.addEventListener('click',function(){selecionarColaborador(btn.dataset.id);});
   });
 }
 
-// ===== RECONHECIMENTO AO CLICAR =====
-function iniciarReconhecimento(idClicado){
-  var funcs=DB.getFuncs();
-  var fClicado=null;
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===idClicado){fClicado=funcs[i];break;}}
-  if(!fClicado)return;
-
-  // Se nenhum colaborador tem rosto cadastrado, vai direto (modo sem biometria)
-  var algumComRosto=funcs.some(function(f){return f.desc&&f.desc.length>0;});
-  if(!algumComRosto){ap(idClicado);return;}
-
-  // Se o colaborador clicado nao tem rosto cadastrado
-  if(!fClicado.desc||!fClicado.desc.length){
-    toast('Colaborador sem rosto cadastrado. Contate o admin.',1);return;
-  }
-
-  // Abrir camera para reconhecimento
-  abrirCamera('reconhecimento', function(fReconhecido){
-    if(!fReconhecido){toast('Nao foi possivel identificar',1);return;}
-    if(fReconhecido.id!==idClicado){
-      toast('Rosto nao confere com '+fClicado.nome,1);return;
-    }
-    ap(fReconhecido.id);
+// ===== SELECIONAR =====
+function selecionarColaborador(id){
+  if(!_funcs)return;
+  var f=_funcs.find(function(x){return x.id===id;});
+  if(!f)return;
+  var comRosto=_funcs.some(function(x){return x.desc&&x.desc.length>0;});
+  if(!comRosto){ap(id);return;}
+  if(!f.desc||!f.desc.length){toast('Colaborador sem rosto cadastrado. Contate o admin.',1);return;}
+  abrirCamera('reconhecimento',function(fRec){
+    if(!fRec){mostrarSemBio(_funcs);return;}
+    if(fRec.id!==id){toast('Rosto nao confere com '+f.nome,1);return;}
+    ap(fRec.id);
   });
+}
+
+function mostrarSemBio(lista){
+  var painel=document.getElementById('sem-bio');
+  var ul=document.getElementById('bio-lista');
+  ul.innerHTML='';
+  lista.forEach(function(f){
+    var ini=f.nome.split(' ').map(function(p){return p[0];}).join('').substring(0,2).toUpperCase();
+    var btn=document.createElement('button');
+    btn.className='bio-item';
+    btn.innerHTML='<div class="av">'+ini+'</div><div><div class="fn">'+f.nome+'</div><div class="fc">'+(f.cargo||'Colaborador')+'</div></div>';
+    btn.addEventListener('click',function(){painel.style.display='none';ap(f.id);});
+    ul.appendChild(btn);
+  });
+  painel.style.display='flex';
 }
 
 function ap(id){
-  var funcs=DB.getFuncs();fa=null;
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===id){fa=funcs[i];break;}}
+  if(!_funcs)return;
+  fa=_funcs.find(function(x){return x.id===id;})||null;
   if(!fa)return;
   document.getElementById('pnome').textContent=fa.nome;
   document.getElementById('pcargo').textContent=fa.cargo||'Colaborador';
@@ -215,18 +202,29 @@ function ap(id){
   var el=document.getElementById('hini');
   if(fa.foto){el.style.backgroundImage='url('+fa.foto+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent='';}
   else{el.style.backgroundImage='';el.textContent=ini;}
-  ms('tp');atBotoes();setSS('i');
+  ms('tp');setSS('i');
+  var hoje=new Date().toISOString().slice(0,10);
+  apiGet({acao:'getRegistrosHoje',nome:fa.nome,data:hoje},function(data){
+    _regsUser={};
+    if(data.ok&&data.registros)data.registros.forEach(function(r){_regsUser[r.tipo]=r.hora;});
+    atBotoes();
+  },function(){_regsUser={};atBotoes();});
 }
 
 function marcar(tipo){
+  if(!fa)return;
+  if(_regsUser[tipo]){toast('Ja registrado!',1);return;}
   var n=new Date(),p=function(v){return String(v).padStart(2,'0');};
   var hora=p(n.getHours())+':'+p(n.getMinutes()),data=n.toISOString().slice(0,10);
-  var regs=DB.getRegs();
-  for(var i=0;i<regs.length;i++){if(regs[i].fid===fa.id&&regs[i].data===data&&regs[i].tipo===tipo){toast('Ja registrado!',1);return;}}
-  var reg={id:Date.now(),fid:fa.id,tipo:tipo,hora:hora,data:data};
-  regs.push(reg);DB.setRegs(regs);atBotoes();
+  _regsUser[tipo]=hora;
+  atBotoes();
   var lb={ENTRADA:'Entrada',SAIDA_ALMOCO:'Saida almoco',RETORNO_ALMOCO:'Retorno',SAIDA:'Saida'};
-  toast(lb[tipo]+' as '+hora);rl();enviar(reg);
+  toast(lb[tipo]+' as '+hora);
+  setSS('s');
+  var cfg=CFG.get();
+  var pl={setor:cfg.setor,nome:fa.nome,cargo:fa.cargo||'-',tipo:tipo,hora:hora,data:data,timestamp:new Date().toISOString()};
+  fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)})
+    .then(function(){setSS('ok');}).catch(function(){setSS('e');});
 }
 
 function setSS(s){
@@ -238,24 +236,14 @@ function setSS(s){
   else{d.className='dt da';x.textContent='-';}
 }
 
-function enviar(reg){
-  setSS('s');
-  var funcs=DB.getFuncs(),fu=null;
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===reg.fid){fu=funcs[i];break;}}
-  var pl={setor:DB.getCfg().setor,nome:fu?fu.nome:'-',cargo:fu?fu.cargo:'-',tipo:reg.tipo,hora:reg.hora,data:reg.data,timestamp:new Date().toISOString()};
-  fetch(SU,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(pl)})
-  .then(function(){setSS('ok');}).catch(function(){setSS('e');});
-}
-
 function atBotoes(){
-  var hoje=new Date().toISOString().slice(0,10),f={};
-  DB.getRegs().filter(function(x){return x.fid===fa.id&&x.data===hoje;}).forEach(function(x){f[x.tipo]=x.hora;});
   ['ENTRADA','SAIDA_ALMOCO','RETORNO_ALMOCO','SAIDA'].forEach(function(t){
     var b=document.getElementById('b'+t),h=document.getElementById('h'+t),r=document.getElementById('r'+t);
-    if(f[t]){
-      b.disabled=true;h.textContent=f[t];r.textContent=f[t];
+    var hora=_regsUser[t];
+    if(hora){
+      b.disabled=true;h.textContent=hora;r.textContent=hora;
       if(!b.querySelector('.ck')){var ok=document.createElement('span');ok.className='ck';ok.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';b.appendChild(ok);}
-    }else{
+    } else {
       b.disabled=false;h.textContent='';r.textContent='-';
       var ck=b.querySelector('.ck');if(ck)ck.remove();
     }
@@ -271,11 +259,9 @@ function abrirAdmin(){
 }
 function fecharMod(){document.getElementById('mod').style.display='none';}
 function okAdm(){
-  if(document.getElementById('msenha').value===DB.getCfg().senha){
-    fecharMod();ms('ta');abaF();radAdm();
-  }else{document.getElementById('merr').style.display='block';}
+  if(document.getElementById('msenha').value===CFG.get().senha){fecharMod();ms('ta');abaF();radAdm();}
+  else{document.getElementById('merr').style.display='block';}
 }
-
 function abaF(){
   document.getElementById('tab-f').classList.add('on');document.getElementById('tab-c').classList.remove('on');
   document.getElementById('pf').classList.add('on');document.getElementById('pc').classList.remove('on');
@@ -284,41 +270,37 @@ function abaF(){
 function abaC(){
   document.getElementById('tab-c').classList.add('on');document.getElementById('tab-f').classList.remove('on');
   document.getElementById('pc').classList.add('on');document.getElementById('pf').classList.remove('on');
-  document.getElementById('csetor').value=DB.getCfg().setor||'';
+  document.getElementById('csetor').value=CFG.get().setor||'';
 }
 
 function radAdm(){
-  var el=document.getElementById('adml'),funcs=DB.getFuncs();
-  if(!funcs.length){el.innerHTML='<div class="empty">Nenhum colaborador</div>';return;}
-  el.innerHTML=funcs.map(function(f){
-    var temFoto=f.foto?'<img src="'+f.foto+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid '+(f.desc?'#7dcf3a':'#C9A84C')+'" />':'<div class="fav">'+f.nome.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>';
-    var badgeFace=f.desc?'<span style="font-size:10px;color:#7dcf3a;margin-right:4px">&#128247;&#10003;</span>':'<span style="font-size:10px;color:#f09595;margin-right:4px">&#128247;&#10005;</span>';
-    return '<div class="fcard">'+temFoto+'<div style="flex:1;margin-left:10px"><div class="fn">'+f.nome+'</div><div style="font-size:12px;color:var(--t2)">'+(f.cargo||'-')+' '+badgeFace+'</div></div><button class="bcam" data-id="'+f.id+'" title="Cadastrar rosto">&#128247;</button><button class="bedt" data-id="'+f.id+'" title="Editar">&#9998;</button><button class="brm" data-id="'+f.id+'" title="Remover">&#10005;</button></div>';
-  }).join('');
-  document.querySelectorAll('#adml .brm').forEach(function(btn){btn.addEventListener('click',function(){rmF(btn.dataset.id);});});
-  document.querySelectorAll('#adml .bedt').forEach(function(btn){btn.addEventListener('click',function(){abrirEdit(btn.dataset.id);});});
-  document.querySelectorAll('#adml .bcam').forEach(function(btn){btn.addEventListener('click',function(){cadastrarRosto(btn.dataset.id);});});
+  carregarFuncs(function(funcs){
+    var el=document.getElementById('adml');
+    if(!funcs.length){el.innerHTML='<div class="empty">Nenhum colaborador</div>';return;}
+    el.innerHTML=funcs.map(function(f){
+      var temFoto=f.foto?'<img src="'+f.foto+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid '+(f.desc?'#7dcf3a':'#C9A84C')+'" />':'<div class="fav">'+f.nome.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>';
+      var badgeFace=f.desc?'<span style="font-size:10px;color:#7dcf3a;margin-right:4px">&#128247;&#10003;</span>':'<span style="font-size:10px;color:#f09595;margin-right:4px">&#128247;&#10005;</span>';
+      return '<div class="fcard">'+temFoto+'<div style="flex:1;margin-left:10px"><div class="fn">'+f.nome+'</div><div style="font-size:12px;color:var(--t2)">'+(f.cargo||'-')+' '+badgeFace+'</div></div><button class="bcam" data-id="'+f.id+'" title="Cadastrar rosto">&#128247;</button><button class="bedt" data-id="'+f.id+'" title="Editar">&#9998;</button><button class="brm" data-id="'+f.id+'" title="Remover">&#10005;</button></div>';
+    }).join('');
+    document.querySelectorAll('#adml .brm').forEach(function(btn){btn.addEventListener('click',function(){rmF(btn.dataset.id);});});
+    document.querySelectorAll('#adml .bedt').forEach(function(btn){btn.addEventListener('click',function(){abrirEdit(btn.dataset.id);});});
+    document.querySelectorAll('#adml .bcam').forEach(function(btn){btn.addEventListener('click',function(){cadastrarRosto(btn.dataset.id);});});
+  });
 }
 
-// ===== CADASTRO DE ROSTO =====
 function cadastrarRosto(id){
-  var funcs=DB.getFuncs(),f=null;
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===id){f=funcs[i];break;}}
+  var f=(_funcs||[]).find(function(x){return x.id===id;});
   if(!f)return;
   toast('Posicione o rosto de '+f.nome+' na camera');
-  abrirCamera('cadastro', function(foto, desc){
-    var funcsAtual=DB.getFuncs();
-    for(var i=0;i<funcsAtual.length;i++){
-      if(funcsAtual[i].id===id){funcsAtual[i].foto=foto;funcsAtual[i].desc=desc;break;}
-    }
-    DB.setFuncs(funcsAtual);radAdm();rl();
-    toast('Rosto de '+f.nome+' cadastrado!');
+  abrirCamera('cadastro',function(foto,desc){
+    f.foto=foto;f.desc=desc;
+    sincronizarColaboradores();
+    radAdm();toast('Rosto de '+f.nome+' cadastrado!');
   });
 }
 
 function abrirEdit(id){
-  var funcs=DB.getFuncs(),f=null;
-  for(var i=0;i<funcs.length;i++){if(funcs[i].id===id){f=funcs[i];break;}}
+  var f=(_funcs||[]).find(function(x){return x.id===id;});
   if(!f)return;
   feditId=id;
   document.getElementById('enome').value=f.nome;
@@ -327,153 +309,114 @@ function abrirEdit(id){
   document.getElementById('edit-box').style.display='block';
   document.getElementById('enome').focus();
 }
-function fecharEdit(){
-  feditId=null;
-  document.getElementById('edit-box').style.display='none';
-}
+function fecharEdit(){feditId=null;document.getElementById('edit-box').style.display='none';}
 function salvarEdit(){
   if(!feditId)return;
-  var nome=document.getElementById('enome').value.trim();
-  var cargo=document.getElementById('ecargo').value.trim();
+  var nome=document.getElementById('enome').value.trim(),cargo=document.getElementById('ecargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
-  var funcs=DB.getFuncs();
-  var emailEdit=document.getElementById('eemail').value.trim();for(var i=0;i<funcs.length;i++){if(funcs[i].id===feditId){funcs[i].nome=nome;funcs[i].cargo=cargo;funcs[i].email=emailEdit;break;}}
-  DB.setFuncs(funcs);fecharEdit();radAdm();rl();toast('Atualizado!');sincronizarColaboradores();
+  var f=(_funcs||[]).find(function(x){return x.id===feditId;});
+  if(!f)return;
+  f.nome=nome;f.cargo=cargo;f.email=document.getElementById('eemail').value.trim();
+  sincronizarColaboradores();fecharEdit();radAdm();rl();toast('Atualizado!');
 }
-
 function addF(){
   var nome=document.getElementById('fnome').value.trim(),cargo=document.getElementById('fcargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
-  var funcs=DB.getFuncs();
-  var email=document.getElementById('femail').value.trim();funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,email:email,foto:null,desc:null});
-  DB.setFuncs(funcs);
-  document.getElementById('fnome').value='';document.getElementById('fcargo').value='';
-  radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em 📷');sincronizarColaboradores();
+  if(!_funcs)_funcs=[];
+  _funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,email:document.getElementById('femail').value.trim(),foto:null,desc:null});
+  sincronizarColaboradores();
+  document.getElementById('fnome').value='';document.getElementById('fcargo').value='';document.getElementById('femail').value='';
+  radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em &#128247;');
 }
 function rmF(id){
   if(!confirm('Remover colaborador?'))return;
-  DB.setFuncs(DB.getFuncs().filter(function(f){return f.id!==id;}));
-  radAdm();rl();toast('Removido');sincronizarColaboradores();
+  _funcs=(_funcs||[]).filter(function(f){return f.id!==id;});
+  sincronizarColaboradores();radAdm();rl();toast('Removido');
 }
 function salvarC(){
-  var cfg=DB.getCfg(),s=document.getElementById('csetor').value.trim(),p=document.getElementById('csenha').value.trim();
-  if(s)cfg.setor=s;if(p&&p.length>=4)cfg.senha=p;DB.setCfg(cfg);
+  var cfg=CFG.get(),s=document.getElementById('csetor').value.trim(),p=document.getElementById('csenha').value.trim();
+  if(s)cfg.setor=s;if(p&&p.length>=4)cfg.senha=p;CFG.set(cfg);
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
   document.getElementById('adm-setor').textContent=cfg.setor;
   toast('Salvo!');
 }
 function resetar(){
-  if(!confirm('Apagar TUDO?'))return;
-  [NS+'cfg',NS+'funcs',NS+'regs'].forEach(function(k){localStorage.removeItem(k);});
-  location.reload();
+  if(!confirm('Apagar TUDO? Isso tambem apaga os colaboradores da planilha!'))return;
+  localStorage.removeItem('acponto_cfg');
+  _funcs=[];sincronizarColaboradores();location.reload();
 }
 
 // ===== RELATORIO =====
-function horaMin(h){if(!h)return 0;var p=h.split(':');return parseInt(p[0])*60+(parseInt(p[1])||0);}
+function horaMin(h){if(!h)return 0;var p=String(h).split(':');return parseInt(p[0])*60+(parseInt(p[1])||0);}
 function minHora(m){if(!m||m<=0)return '-';return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0');}
 
 function abrirRelatorio(){
-  var funcs=DB.getFuncs(),regs=DB.getRegs();
   var hoje=new Date(),mes=hoje.getMonth(),ano=hoje.getFullYear();
   var nM=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  toast('Gerando relatorio, aguarde...');
+  carregarFuncs(function(funcs){
+    if(!funcs.length){toast('Nenhum colaborador cadastrado',1);return;}
+    apiGet({acao:'getRegistrosMes',mes:mes,ano:ano},function(data){
+      gerarRelatorio(funcs,data.ok?data.regs:{},nM[mes]+' '+ano,mes,ano);
+    },function(){toast('Erro ao buscar dados da planilha',1);});
+  });
+}
+
+function gerarRelatorio(funcs,regsMap,tMes,mes,ano){
   var dS=['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
-  var tMes=nM[mes]+' '+ano;
   var diasNoMes=new Date(ano,mes+1,0).getDate();
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatorio '+tMes+'</title>';
-  html+='<style>';
-  html+='*{box-sizing:border-box;margin:0;padding:0}';
-  html+='body{font-family:Arial,sans-serif;background:#fff;color:#333;font-size:11px}';
-  html+='.pagina{width:210mm;min-height:297mm;padding:10mm 12mm;page-break-after:always;display:flex;flex-direction:column}';
-  html+='.pagina:last-of-type{page-break-after:avoid}';
-  html+='.topo{text-align:center;margin-bottom:6px;border-bottom:2px solid #C9A84C;padding-bottom:6px}';
-  html+='.topo h1{color:#C9A84C;font-size:16px;margin:0}';
-  html+='.topo p{color:#888;font-size:10px;margin:2px 0}';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatorio '+tMes+'</title><style>';
+  html+='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#333;font-size:11px}';
+  html+='.pagina{width:210mm;min-height:297mm;padding:10mm 12mm;page-break-after:always;display:flex;flex-direction:column}.pagina:last-of-type{page-break-after:avoid}';
+  html+='.topo{text-align:center;margin-bottom:6px;border-bottom:2px solid #C9A84C;padding-bottom:6px}.topo h1{color:#C9A84C;font-size:16px;margin:0}.topo p{color:#888;font-size:10px;margin:2px 0}';
   html+='.info-func{display:flex;align-items:center;gap:10px;background:#1c1a10;color:#C9A84C;padding:8px 10px;border-radius:6px;margin-bottom:6px}';
-  html+='.info-func img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #C9A84C;flex-shrink:0}';
-  html+='.info-func .nome{font-size:13px;font-weight:bold}';
-  html+='.info-func .cargo{font-size:10px;color:#e8c86a}';
-  html+='table{width:100%;border-collapse:collapse;flex:1}';
-  html+='thead tr{background:#2d2a1a}';
-  html+='thead th{color:#C9A84C;padding:5px 4px;text-align:center;font-size:10px;border:1px solid #444}';
-  html+='tbody tr{height:22px}';
-  html+='tbody tr:nth-child(even){background:#fafafa}';
-  html+='tbody tr.fds{background:#f0ece0;color:#aaa;font-style:italic}';
-  html+='tbody td{padding:3px 4px;text-align:center;border:1px solid #ddd;font-size:10px}';
-  html+='.td-data{text-align:left;font-weight:500;padding-left:6px}';
-  html+='.atraso{color:#c0392b;font-weight:bold}';
-  html+='.extra{color:#27ae60;font-weight:bold}';
+  html+='.info-func img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #C9A84C;flex-shrink:0}.info-func .nome{font-size:13px;font-weight:bold}.info-func .cargo{font-size:10px;color:#e8c86a}';
+  html+='table{width:100%;border-collapse:collapse;flex:1}thead tr{background:#2d2a1a}thead th{color:#C9A84C;padding:5px 4px;text-align:center;font-size:10px;border:1px solid #444}';
+  html+='tbody tr{height:22px}tbody tr:nth-child(even){background:#fafafa}tbody tr.fds{background:#f0ece0;color:#aaa;font-style:italic}tbody td{padding:3px 4px;text-align:center;border:1px solid #ddd;font-size:10px}';
+  html+='.td-data{text-align:left;font-weight:500;padding-left:6px}.atraso{color:#c0392b;font-weight:bold}.extra{color:#27ae60;font-weight:bold}';
   html+='.totais-row td{background:#2d2a1a;color:#C9A84C;font-weight:bold;border:1px solid #444;padding:5px 4px}';
-  html+='.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:12px 0 0 0;margin-top:8px;border-top:1px solid #ddd}';
-  html+='.assin-campo{margin-top:28px;border-top:1px solid #333;padding-top:3px;text-align:center;font-size:9px;color:#888}';
-  html+='.assin-label{font-size:10px;color:#666}';
-  html+='@media print{body{margin:0}.pagina{padding:8mm 10mm}button{display:none}}';
-  html+='</style></head><body>';
+  html+='.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:12px 0 0;margin-top:8px;border-top:1px solid #ddd}.assin-campo{margin-top:28px;border-top:1px solid #333;padding-top:3px;text-align:center;font-size:9px;color:#888}.assin-label{font-size:10px;color:#666}';
+  html+='@media print{body{margin:0}.pagina{padding:8mm 10mm}button{display:none}}</style></head><body>';
 
   funcs.forEach(function(f){
-    // Construir mapa de registros do mes
-    var rf=regs.filter(function(r){
-      var d=new Date(r.data+'T12:00:00');
-      return r.fid===f.id&&d.getMonth()===mes&&d.getFullYear()===ano;
-    });
+    var regsFunc=regsMap[f.nome]||[];
     var dm={};
-    rf.forEach(function(r){if(!dm[r.data])dm[r.data]={};dm[r.data][r.tipo]=r.hora;});
-
+    regsFunc.forEach(function(r){var d=String(r.data).slice(0,10);if(!dm[d])dm[d]={};dm[d][r.tipo]=r.hora;});
     var tT=0,tA=0,tE=0;
     var fotoTag=f.foto?'<img src="'+f.foto+'" />':'';
-
-    html+='<div class="pagina">';
-    html+='<div class="topo"><h1>ALDEN CAPS — FOLHA DE PONTO</h1><p>Periodo: '+tMes+'</p></div>';
+    html+='<div class="pagina"><div class="topo"><h1>ALDEN CAPS — FOLHA DE PONTO</h1><p>Periodo: '+tMes+'</p></div>';
     html+='<div class="info-func">'+fotoTag+'<div><div class="nome">'+f.nome+'</div><div class="cargo">'+(f.cargo||'Colaborador')+'</div></div></div>';
-    html+='<table>';
-    html+='<thead><tr><th style="width:70px">Data</th><th style="width:30px">Dia</th><th>Entrada</th><th>S.Almoco</th><th>Retorno</th><th>Saida</th><th>Trabalhado</th><th>Atraso</th><th>H.Extras</th></tr></thead>';
-    html+='<tbody>';
-
-    // Iterar todos os dias do mês
+    html+='<table><thead><tr><th style="width:70px">Data</th><th style="width:30px">Dia</th><th>Entrada</th><th>S.Almoco</th><th>Retorno</th><th>Saida</th><th>Trabalhado</th><th>Atraso</th><th>H.Extras</th></tr></thead><tbody>';
     for(var d=1;d<=diasNoMes;d++){
       var dataStr=ano+'-'+String(mes+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-      var dt=new Date(dataStr+'T12:00:00');
-      var ds=dt.getDay();
-      var fds=ds===0||ds===6;
+      var dt=new Date(dataStr+'T12:00:00'),ds=dt.getDay(),fds=ds===0||ds===6;
       var r=dm[dataStr]||{};
       var en=r['ENTRADA']||'',sa=r['SAIDA_ALMOCO']||'',re=r['RETORNO_ALMOCO']||'',si=r['SAIDA']||'';
       var sT='-',sA='-',sE='-';
       if(en&&si){
         var eM=horaMin(en),siM=horaMin(si),alM=(sa&&re)?Math.max(0,horaMin(re)-horaMin(sa)):0;
+        if(siM<eM)siM+=24*60;
         var tM=Math.max(0,siM-eM-alM);sT=minHora(tM);
-        var espS=ds===5?17*60:18*60,espT=espS-8*60-60;
-        var TOL=5;// Portaria 671/2021 - tolerancia 5 min
-if(eM>480+TOL){var at=eM-480;tA+=at;sA=minHora(at);}
+        var espS=ds===5?17*60:18*60,espT=espS-8*60-60,TOL=5;
+        if(eM>480+TOL){var at=eM-480;tA+=at;sA=minHora(at);}
         if(tM>espT+TOL){var ex=tM-espT;tE+=ex;sE=minHora(ex);}
         if(!fds)tT+=tM;
       }
-      html+='<tr class="'+(fds?'fds':'')+'"><td class="td-data">'+dataStr+'</td><td>'+dS[ds]+'</td>';
-      html+='<td>'+(en||'-')+'</td><td>'+(sa||'-')+'</td><td>'+(re||'-')+'</td><td>'+(si||'-')+'</td>';
-      html+='<td>'+sT+'</td>';
-      html+='<td class="'+(sA!=='-'?'atraso':'')+'">'+sA+'</td>';
-      html+='<td class="'+(sE!=='-'?'extra':'')+'">'+sE+'</td></tr>';
+      html+='<tr class="'+(fds?'fds':'')+'"><td class="td-data">'+dataStr+'</td><td>'+dS[ds]+'</td><td>'+(en||'-')+'</td><td>'+(sa||'-')+'</td><td>'+(re||'-')+'</td><td>'+(si||'-')+'</td><td>'+sT+'</td><td class="'+(sA!=='-'?'atraso':'')+'">'+sA+'</td><td class="'+(sE!=='-'?'extra':'')+'">'+sE+'</td></tr>';
     }
-
-    html+='<tr class="totais-row"><td colspan="6" style="text-align:center">TOTAIS DO MES</td>';
-    html+='<td>'+minHora(tT)+'</td><td>'+minHora(tA)+'</td><td>'+minHora(tE)+'</td></tr>';
-    html+='</tbody></table>';
-
-    html+='<div class="assinaturas">';
-    html+='<div><p class="assin-label">Assinatura do Colaborador</p><div class="assin-campo">'+f.nome+'</div></div>';
-    html+='<div><p class="assin-label">Assinatura do Responsavel</p><div class="assin-campo">Gestor Responsavel</div></div>';
-    html+='</div></div>';
+    html+='<tr class="totais-row"><td colspan="6" style="text-align:center">TOTAIS DO MES</td><td>'+minHora(tT)+'</td><td>'+minHora(tA)+'</td><td>'+minHora(tE)+'</td></tr></tbody></table>';
+    html+='<div class="assinaturas"><div><p class="assin-label">Assinatura do Colaborador</p><div class="assin-campo">'+f.nome+'</div></div><div><p class="assin-label">Assinatura do Responsavel</p><div class="assin-campo">Gestor Responsavel</div></div></div></div>';
   });
-
-  if(!funcs.length)html+='<div class="pagina"><p style="text-align:center;color:#aaa;padding:40px">Nenhum colaborador cadastrado</p></div>';
-  html+='<div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#C9A84C;color:#1c1a10;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer">&#128438; Imprimir / Salvar PDF</button></div>';
-  html+='</body></html>';
+  html+='<div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#C9A84C;color:#1c1a10;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer">&#128438; Imprimir / Salvar PDF</button></div></body></html>';
   var w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 
 window.addEventListener('DOMContentLoaded',function(){
-  var cfg=DB.getCfg();
+  var cfg=CFG.get();
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
   document.getElementById('adm-setor').textContent=cfg.setor;
-  restaurarColaboradores(function(){rl();});setInterval(tick,1000);tick();ms('ts');
+  carregarFuncs(function(){rl();});
+  setInterval(tick,1000);tick();ms('ts');
   document.getElementById('btn-admin').addEventListener('click',abrirAdmin);
   document.getElementById('btn-voltar1').addEventListener('click',voltar);
   document.getElementById('btn-voltar2').addEventListener('click',voltar);
@@ -489,8 +432,20 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('btn-salvar-edit').addEventListener('click',salvarEdit);
   document.getElementById('btn-cancelar-edit').addEventListener('click',fecharEdit);
   document.getElementById('cam-fechar').addEventListener('click',fecharCamera);
+  document.getElementById('bio-fechar') && document.getElementById('bio-fechar').addEventListener('click',function(){document.getElementById('sem-bio').style.display='none';fecharCamera();});
   document.getElementById('bENTRADA').addEventListener('click',function(){marcar('ENTRADA');});
   document.getElementById('bSAIDA_ALMOCO').addEventListener('click',function(){marcar('SAIDA_ALMOCO');});
   document.getElementById('bRETORNO_ALMOCO').addEventListener('click',function(){marcar('RETORNO_ALMOCO');});
   document.getElementById('bSAIDA').addEventListener('click',function(){marcar('SAIDA');});
+  document.addEventListener('abrirReconhecimento',function(){
+    if(!_funcs){carregarFuncs(function(funcs){
+      var comFoto=funcs.filter(function(f){return f.desc&&f.desc.length>0;});
+      if(comFoto.length>0){abrirCamera('reconhecimento',function(f){if(f)ap(f.id);else mostrarSemBio(funcs);});}
+      else{fecharCamera();mostrarSemBio(funcs);}
+    });return;}
+    var comFoto=(_funcs||[]).filter(function(f){return f.desc&&f.desc.length>0;});
+    if(comFoto.length>0){abrirCamera('reconhecimento',function(f){if(f)ap(f.id);else mostrarSemBio(_funcs||[]);});}
+    else{fecharCamera();mostrarSemBio(_funcs||[]);}
+  });
+  document.addEventListener('selecionarColaborador',function(e){if(e.detail)ap(e.detail.id);});
 });
