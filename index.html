@@ -213,90 +213,29 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 <script src="app.js"></script>
 <script>
 window.addEventListener('load', function(){
-
-  // Patch reconhecerRosto: chama cb(null) quando nao reconhece
-  // em vez de apenas fechar camera e mostrar toast
-  var _origReconhecerRosto = reconhecerRosto;
-  reconhecerRosto = function(cb){
-    var video = document.getElementById('cam-video');
-    var funcs = DB.getFuncs().filter(function(f){ return f.desc && f.desc.length > 0; });
-    if(!funcs.length){ fecharCamera(); cb(null); return; }
-
-    document.getElementById('cam-status').textContent = 'Reconhecendo...';
-    var labeled = funcs.map(function(f){
-      return new faceapi.LabeledFaceDescriptors(f.id, [new Float32Array(f.desc)]);
-    });
-    var matcher = new faceapi.FaceMatcher(labeled, 0.5);
-
-    faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks(true).withFaceDescriptor()
-      .then(function(det){
-        if(!det){
-          document.getElementById('cam-status').textContent = 'Olhe para a camera...';
-          setTimeout(function(){ reconhecerRosto(cb); }, 2000);
-          return;
-        }
-        var result = matcher.findBestMatch(det.descriptor);
-        if(result.label === 'unknown'){
-          // Nao reconhecido: fecha camera e chama cb(null)
-          document.getElementById('cam-status').textContent = 'Nao reconhecido...';
-          setTimeout(function(){ fecharCamera(); cb(null); }, 800);
+  var btnReg = document.getElementById('btn-registrar-ponto');
+  if(btnReg){
+    btnReg.addEventListener('click', function(){
+      if(typeof carregarFuncs !== 'function') return;
+      carregarFuncs(function(funcs){
+        var comFoto = funcs.filter(function(f){ return f.desc && f.desc.length > 0; });
+        if(comFoto.length > 0){
+          abrirCamera('reconhecimento', function(f){
+            if(f) ap(f.id);
+            else mostrarSemBio(funcs);
+          });
         } else {
-          var f = null, all = DB.getFuncs();
-          for(var i=0;i<all.length;i++){ if(all[i].id===result.label){f=all[i];break;} }
-          document.getElementById('cam-status').textContent = 'Bem-vindo, '+(f?f.nome:'')+'!';
-          setTimeout(function(){ fecharCamera(); cb(f); }, 800);
-        }
-      }).catch(function(e){ fecharCamera(); cb(null); });
-  };
-
-  // Botao Registrar Ponto
-  document.getElementById('btn-registrar-ponto').addEventListener('click', function(){
-    var funcs = DB.getFuncs();
-    var comFoto = funcs.filter(function(f){ return f.desc && f.desc.length > 0; });
-
-    if(comFoto.length > 0){
-      // Tem biometria: tenta reconhecimento
-      abrirCamera('reconhecimento', function(f){
-        if(f){
-          ap(f.id); // Reconhecido: vai direto para os botoes
-        } else {
-          // Nao reconhecido: abre selecao de nome automaticamente
           mostrarSemBio(funcs);
         }
       });
-    } else {
-      // Ninguem tem biometria: vai direto para selecao
-      mostrarSemBio(funcs);
-    }
-  });
-
-  // Fechar painel sem-bio
-  document.getElementById('bio-fechar').addEventListener('click', function(){
-    document.getElementById('sem-bio').style.display = 'none';
-  });
-
-});
-
-function mostrarSemBio(lista){
-  var painel = document.getElementById('sem-bio');
-  var ul = document.getElementById('bio-lista');
-  ul.innerHTML = '';
-  lista.forEach(function(f){
-    var ini = f.nome.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
-    var btn = document.createElement('button');
-    btn.className = 'bio-item';
-    var fotoStyle = f.foto ? 'style="background-image:url('+f.foto+');background-size:cover;background-position:center"' : '';
-    var avatarContent = f.foto ? '' : ini;
-    btn.innerHTML = '<div class="av" '+fotoStyle+'>'+avatarContent+'</div><div><div class="fn">'+f.nome+'</div><div class="fc">'+(f.cargo||'Colaborador')+'</div></div>';
-    btn.addEventListener('click', function(){
-      document.getElementById('sem-bio').style.display = 'none';
-      ap(f.id);
     });
-    ul.appendChild(btn);
+  }
+  var bf = document.getElementById('bio-fechar');
+  if(bf) bf.addEventListener('click', function(){
+    document.getElementById('sem-bio').style.display = 'none';
+    if(typeof fecharCamera === 'function') fecharCamera();
   });
-  painel.style.display = 'flex';
-}
+});
 </script>
 </body>
 </html>
