@@ -320,6 +320,8 @@ function abrirEdit(id){
   document.getElementById('enome').value=f.nome;
   document.getElementById('ecargo').value=f.cargo||'';
   document.getElementById('eemail').value=f.email||'';
+  document.getElementById('ewhatsapp').value=f.whatsapp||'';
+  document.getElementById('ewppkey').value=f.wppKey||'';
   document.getElementById('edit-box').style.display='block';
   document.getElementById('enome').focus();
 }
@@ -331,6 +333,8 @@ function salvarEdit(){
   var f=(_funcs||[]).find(function(x){return x.id===feditId;});
   if(!f)return;
   f.nome=nome;f.cargo=cargo;f.email=document.getElementById('eemail').value.trim();
+  f.whatsapp=document.getElementById('ewhatsapp').value.trim();
+  f.wppKey=document.getElementById('ewppkey').value.trim();
   sincronizarColaboradores();fecharEdit();radAdm();rl();toast('Atualizado!');
 }
 function addF(){
