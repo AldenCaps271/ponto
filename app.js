@@ -435,7 +435,7 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('bio-fechar') && document.getElementById('bio-fechar').addEventListener('click',function(){document.getElementById('sem-bio').style.display='none';fecharCamera();});
   document.getElementById('bENTRADA').addEventListener('click',function(){marcar('ENTRADA');});
   document.getElementById('bSAIDA_ALMOCO').addEventListener('click',function(){marcar('SAIDA_ALMOCO');});
-  document.getElementById('bRETORNO_ALMOCO').addEventListener('click',function(){marcar('RETORNO_ALMOCO');});
+  document.getElementById('bRETORNO_ALMOCO').addEventListener('click',function(){marcar('RETORNO_ALMOCO');});  document.getElementById('btn-home')?.addEventListener('click',voltar);
   document.getElementById('bSAIDA').addEventListener('click',function(){marcar('SAIDA');});
   document.addEventListener('abrirReconhecimento',function(){
     if(!_funcs){carregarFuncs(function(funcs){
