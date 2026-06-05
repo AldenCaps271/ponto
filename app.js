@@ -202,7 +202,7 @@ function ap(id){
   var el=document.getElementById('hini');
   if(fa.foto){el.style.backgroundImage='url('+fa.foto+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent='';}
   else{el.style.backgroundImage='';el.textContent=ini;}
-  ms('tp');setSS('i');
+  ms('tp');setSS('i');_regsUser={};atBotoes();
   var hoje=new Date().toISOString().slice(0,10);
   apiGet({acao:'getRegistrosHoje',nome:fa.nome,data:hoje},function(data){
     _regsUser={};
@@ -418,7 +418,7 @@ window.addEventListener('DOMContentLoaded',function(){
   carregarFuncs(function(){rl();});
   setInterval(tick,1000);tick();ms('ts');
   document.getElementById('btn-admin').addEventListener('click',abrirAdmin);
-  document.getElementById('btn-voltar1').addEventListener('click',voltar);
+  
   document.getElementById('btn-voltar2').addEventListener('click',voltar);
   document.getElementById('btn-cancel').addEventListener('click',fecharMod);
   document.getElementById('btn-ok').addEventListener('click',okAdm);
