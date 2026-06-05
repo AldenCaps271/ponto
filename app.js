@@ -98,7 +98,7 @@ function reconhecerRosto(cb){
   var funcs=(_funcs||[]).filter(function(f){return f.desc&&f.desc.length>0;});
   if(!funcs.length){fecharCamera();cb(null);return;}
   document.getElementById('cam-status').textContent='Reconhecendo...';
-  var labeled=funcs.map(function(f){return new faceapi.LabeledFaceDescriptors(f.id,[new Float32Array(f.desc)]);});
+  var labeled=funcs.map(function(f){var d=f.desc;if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=d.split(',').map(Number);}}return new faceapi.LabeledFaceDescriptors(f.id,[new Float32Array(d||[])]);});
   var matcher=new faceapi.FaceMatcher(labeled,0.5);
   faceapi.detectSingleFace(video,new faceapi.TinyFaceDetectorOptions())
   .withFaceLandmarks(true).withFaceDescriptor()
