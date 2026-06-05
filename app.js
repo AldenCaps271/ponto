@@ -202,13 +202,13 @@ function ap(id){
   var el=document.getElementById('hini');
   if(fa.foto){el.style.backgroundImage='url('+fa.foto+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent='';}
   else{el.style.backgroundImage='';el.textContent=ini;}
-  ms('tp');setSS('i');_regsUser={};atBotoes();
+  ms('tp');setSS('i');['bENTRADA','bSAIDA_ALMOCO','bRETORNO_ALMOCO','bSAIDA'].forEach(function(b){var el=document.getElementById(b);if(el)el.disabled=true;});
   var hoje=new Date().toISOString().slice(0,10);
   apiGet({acao:'getRegistrosHoje',nome:fa.nome,data:hoje},function(data){
     _regsUser={};
     if(data.ok&&data.registros)data.registros.forEach(function(r){_regsUser[r.tipo]=r.hora;});
     atBotoes();
-  },function(){_regsUser={};atBotoes();});
+  },function(){['bENTRADA','bSAIDA_ALMOCO','bRETORNO_ALMOCO','bSAIDA'].forEach(function(b){var el=document.getElementById(b);if(el)el.disabled=true;});});
 }
 
 function marcar(tipo){
@@ -337,13 +337,14 @@ function salvarEdit(){
   f.wppKey=document.getElementById('ewppkey').value.trim();
   sincronizarColaboradores();fecharEdit();radAdm();rl();toast('Atualizado!');
 }
+function testarWpp(p,k){var ph=(document.getElementById(p)||{}).value||'',ak=(document.getElementById(k)||{}).value||'';if(!ph||!ak){toast('Preencha WhatsApp e API Key',1);return;}fetch('https://api.callmebot.com/whatsapp.php?phone='+ph+'&text=Teste+-+Ponto+Alden+Caps&apikey='+ak).then(function(r){return r.text();}).then(function(t){toast(t.toLowerCase().includes('queued')?'Mensagem enviada!':'Enviado! Confira o WhatsApp.',0);}).catch(function(){toast('Erro. Verifique os dados.',1);});}
 function addF(){
   var nome=document.getElementById('fnome').value.trim(),cargo=document.getElementById('fcargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
   if(!_funcs)_funcs=[];
-  _funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,email:document.getElementById('femail').value.trim(),foto:null,desc:null});
+  _funcs.push({id:Date.now().toString(),nome:nome,cargo:cargo,email:document.getElementById('femail').value.trim(),whatsapp:document.getElementById('fwhatsapp').value.trim(),wppKey:document.getElementById('fwppkey').value.trim(),foto:null,desc:null});
   sincronizarColaboradores();
-  document.getElementById('fnome').value='';document.getElementById('fcargo').value='';document.getElementById('femail').value='';
+  document.getElementById('fnome').value='';document.getElementById('fcargo').value='';document.getElementById('femail').value='';document.getElementById('fwhatsapp').value='';document.getElementById('fwppkey').value='';
   radAdm();rl();toast('Adicionado! Cadastre o rosto clicando em &#128247;');
 }
 function rmF(id){
@@ -425,7 +426,7 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('msenha').addEventListener('keydown',function(e){if(e.key==='Enter')okAdm();});
   document.getElementById('tab-f').addEventListener('click',abaF);
   document.getElementById('tab-c').addEventListener('click',abaC);
-  document.getElementById('btn-add').addEventListener('click',addF);
+  document.getElementById('btn-add').addEventListener('click',addF);document.getElementById('btn-test-wpp-edit')?.addEventListener('click',function(){testarWpp('ewhatsapp','ewppkey');});document.getElementById('btn-test-wpp-add')?.addEventListener('click',function(){testarWpp('fwhatsapp','fwppkey');});
   document.getElementById('btn-salvarc').addEventListener('click',salvarC);
   document.getElementById('btn-reset').addEventListener('click',resetar);
   document.getElementById('btn-relatorio').addEventListener('click',abrirRelatorio);
