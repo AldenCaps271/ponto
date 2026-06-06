@@ -215,7 +215,7 @@ function marcar(tipo){
   if(!fa)return;
   if(_regsUser[tipo]){toast('Ja registrado!',1);return;}
   var n=new Date(),p=function(v){return String(v).padStart(2,'0');};
-  var hora=p(n.getHours())+':'+p(n.getMinutes()),data=n.toISOString().slice(0,10);
+  var hora=p(n.getHours())+':'+p(n.getMinutes()),data=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
   _regsUser[tipo]=hora;
   atBotoes();
   msgPonto(tipo);
