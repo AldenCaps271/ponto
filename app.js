@@ -337,7 +337,7 @@ function salvarEdit(){
   f.wppKey=document.getElementById('ewppkey').value.trim();
   sincronizarColaboradores();fecharEdit();radAdm();rl();toast('Atualizado!');
 }
-function testarWpp(p,k){var ph=(document.getElementById(p)||{}).value||'',ak=(document.getElementById(k)||{}).value||'';if(!ph||!ak){toast('Preencha WhatsApp e API Key',1);return;}fetch('https://api.callmebot.com/whatsapp.php?phone='+ph+'&text=Teste+-+Ponto+Alden+Caps&apikey='+ak).then(function(r){return r.text();}).then(function(t){toast(t.toLowerCase().includes('queued')?'Mensagem enviada!':'Enviado! Confira o WhatsApp.',0);}).catch(function(){toast('Erro. Verifique os dados.',1);});}
+function testarWpp(p,k){var ph=(document.getElementById(p)||{}).value||'',ak=(document.getElementById(k)||{}).value||'';if(!ph||!ak){toast('Preencha WhatsApp e API Key',1);return;}fetch('https://api.callmebot.com/whatsapp.php?phone='+ph+'&text=Teste+-+Ponto+Alden+Caps&apikey='+ak,{mode:'no-cors'}).then(function(r){return r.text();}).then(function(t){toast(t.toLowerCase().includes('queued')?'Mensagem enviada!':'Enviado! Confira o WhatsApp.',0);}).catch(function(){toast('Erro. Verifique os dados.',1);});}
 function addF(){
   var nome=document.getElementById('fnome').value.trim(),cargo=document.getElementById('fcargo').value.trim();
   if(!nome){toast('Informe o nome',1);return;}
