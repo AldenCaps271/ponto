@@ -406,7 +406,7 @@ var re=(L.retorno&&L.retorno!=='-')?L.retorno:'-';var si=(L.saida&&L.saida!=='-'
 html+='<tr class="'+cls+'"><td class="td-data">'+L.data+'</td><td>'+diaTxt+'</td><td>'+en+'</td><td>'+sa+'</td><td>'+re+'</td><td>'+si+'</td><td>'+trabTxt+'</td><td class="'+(L.atraso?'atraso':'')+'">'+(L.atraso||'-')+'</td><td class="'+(L.extra?'extra':'')+'">'+(L.extra||'-')+'</td><td>'+(L.extra?(L.pct+'%'):'-')+'</td></tr>';
 });
 var t=d.totais;
-html+='<tr class="totais-row"><td colspan="6" style="text-align:center">TOTAIS DO MES</td><td>'+t.trabalhado+'</td><td>'+t.atraso+'</td><td colspan="2">50%: '+t.extra50+' / 100%: '+t.extra100+'</td></tr></tbody></table>';
+html+='<tr class="totais-row"><td colspan="6" style="text-align:center">TOTAIS DO MES</td><td>'+t.trabalhado+'</td><td>'+(t.atraso&&t.atraso!=='\u2014'?'<span style="color:#c0392b">'+t.atraso+'</span>':t.atraso)+'</td><td colspan="2">50%: '+t.extra50+' / 100%: '+t.extra100+'</td></tr></tbody></table>';
 html+='<div class="assinaturas"><div><p class="assin-label">Assinatura do Colaborador</p><div class="assin-campo">'+nome+'</div></div><div><p class="assin-label">Assinatura do Responsavel</p><div class="assin-campo">Gestor Responsavel</div></div></div></div>';
 });
 html+='<div style="text-align:center;padding:20px"><button onclick="window.print()" style="background:#C9A84C;color:#1c1a10;border:none;padding:12px 36px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer">Imprimir / Salvar PDF</button></div></body></html>';
