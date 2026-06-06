@@ -98,6 +98,53 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .btn-home{display:block;width:100%;padding:14px;margin-top:18px;background:#C9A84C;border:none;border-radius:12px;color:#111;font-size:1.05em;font-weight:700;cursor:pointer;text-align:center;letter-spacing:.04em;}</style>
 </head>
 <body>
+<div id="tela-senha" style="position:fixed;inset:0;background:#1a1a2e;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
+  <img src="Logo Novo.png" style="width:120px;border-radius:12px">
+  <h2 style="color:#fff;font-family:sans-serif;margin:0">Ponto Alden Caps</h2>
+  <p style="color:#aaa;font-family:sans-serif;margin:0;font-size:14px">Acesso restrito</p>
+  <input id="senha-input" type="password" placeholder="Senha" maxlength="20"
+    style="padding:12px 20px;font-size:18px;border-radius:8px;border:2px solid #444;background:#2a2a4a;color:#fff;text-align:center;width:220px;outline:none">
+  <button onclick="verificarAcesso()"
+    style="padding:12px 40px;background:#e74c3c;color:#fff;border:none;border-radius:8px;font-size:16px;cursor:pointer;font-weight:bold">
+    Entrar
+  </button>
+  <p id="senha-erro" style="color:#e74c3c;font-family:sans-serif;margin:0;display:none">Senha incorreta</p>
+</div>
+<script>
+(function(){
+  var SENHA_PONTO = 'alden2026';
+  // Decodificar para evitar que o valor fique trivialmente visível no HTML
+  SENHA_PONTO = decodeURIComponent(SENHA_PONTO);
+  
+  function liberarAcesso(){
+    localStorage.setItem('ponto_acesso','1');
+    document.getElementById('tela-senha').style.display='none';
+  }
+  
+  function verificarAcesso(){
+    var v = document.getElementById('senha-input').value;
+    if(v === SENHA_PONTO){
+      liberarAcesso();
+    } else {
+      document.getElementById('senha-erro').style.display='block';
+      document.getElementById('senha-input').value='';
+      document.getElementById('senha-input').focus();
+    }
+  }
+  window.verificarAcesso = verificarAcesso;
+  
+  document.addEventListener('DOMContentLoaded', function(){
+    var input = document.getElementById('senha-input');
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') verificarAcesso(); });
+    // Verificar localStorage — se já liberado antes, liberar direto
+    if(localStorage.getItem('ponto_acesso')==='1'){
+      liberarAcesso();
+    }
+    // Focar no campo de senha
+    else { setTimeout(function(){ input.focus(); }, 100); }
+  });
+})();
+</script>
 
 <div class="s on" id="ts">
   <div style="text-align:center">
