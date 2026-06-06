@@ -136,7 +136,7 @@ function rl(){
   var cfg=CFG.get();
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
   el.innerHTML='<div class="empty">Carregando...</div>';
-  var hoje=new Date().toISOString().slice(0,10);
+  var hoje=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   carregarFuncs(function(funcs){
     if(!funcs.length){el.innerHTML='<div class="empty">Nenhum colaborador ainda.<br>Painel Admin > Colaboradores</div>';return;}
     apiGet({acao:'getStatusHoje',data:hoje},function(data){
@@ -203,7 +203,7 @@ function ap(id){
   if(fa.foto){el.style.backgroundImage='url('+fa.foto+')';el.style.backgroundSize='cover';el.style.backgroundPosition='center';el.textContent='';}
   else{el.style.backgroundImage='';el.textContent=ini;}
   ms('tp');setSS('i');['bENTRADA','bSAIDA_ALMOCO','bRETORNO_ALMOCO','bSAIDA'].forEach(function(b){var el=document.getElementById(b);if(el)el.disabled=true;});
-  var hoje=new Date().toISOString().slice(0,10);
+  var hoje=(function(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');})();
   apiGet({acao:'getRegistrosHoje',nome:fa.nome,data:hoje},function(data){
     _regsUser={};
     if(data.ok&&data.registros)data.registros.forEach(function(r){_regsUser[r.tipo]=r.hora;});
