@@ -495,7 +495,7 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('btn-add').addEventListener('click',addF);document.getElementById('btn-test-wpp-edit')?.addEventListener('click',function(){testarWpp('ewhatsapp','ewppkey');});document.getElementById('btn-test-wpp-add')?.addEventListener('click',function(){testarWpp('fwhatsapp','fwppkey');});
   document.getElementById('btn-salvarc').addEventListener('click',salvarC);
 document.getElementById('btn-salvar-senha-acesso')?.addEventListener('click',alterarSenhaAcesso);
-  document.  document.getElementById('btn-relatorio').addEventListener('click',abrirRelatorio);
+  document.getElementById('btn-relatorio').addEventListener('click',abrirRelatorio);
   document.getElementById('btn-salvar-edit').addEventListener('click',salvarEdit);
   document.getElementById('btn-cancelar-edit').addEventListener('click',fecharEdit);
   document.getElementById('cam-fechar').addEventListener('click',fecharCamera);
