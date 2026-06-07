@@ -324,8 +324,23 @@ function radAdm(){
     el.innerHTML=funcs.map(function(f){
       var temFoto=f.foto?'<img src="'+f.foto+'" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid '+(f.desc?'#7dcf3a':'#C9A84C')+'" />':'<div class="fav">'+f.nome.split(' ').map(function(w){return w[0];}).join('').slice(0,2).toUpperCase()+'</div>';
       var badgeFace=f.desc?'<span style="font-size:10px;color:#7dcf3a;margin-right:4px">&#128247;&#10003;</span>':'<span style="font-size:10px;color:#f09595;margin-right:4px">&#128247;&#10005;</span>';
-      return '<div class="fcard">'+temFoto+'<div style="flex:1;margin-left:10px"><div class="fn">'+f.nome+'</div><div style="font-size:12px;color:var(--t2)">'+(f.cargo||'-')+' '+badgeFace+'</div></div><button class="bcam" data-id="'+f.id+'" title="Cadastrar rosto">&#128247;</button><button class="bedt" data-id="'+f.id+'" title="Editar">&#9998;</button><button class="brm" data-id="'+f.id+'" title="Remover">&#10005;</button></div>';
+      function lin(rot,val){return val?'<div style="display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid rgba(201,168,76,.08)"><span style="color:var(--t2);font-size:11px">'+rot+'</span><span style="font-size:12px;text-align:right">'+val+'</span></div>':'';}
+      var det='<div class="cdet" id="cdet-'+f.id+'" style="display:none;padding:10px 12px;background:rgba(0,0,0,.18);border-top:1px solid var(--b)">'
+        +lin('CPF',f.cpf)+lin('RG',f.rg)+lin('Nascimento',f.dataNasc)+lin('Admiss\u00e3o',f.dataAdmissao)
+        +lin('Endere\u00e7o',f.endereco)+lin('Cidade/UF',f.cidade)+lin('CEP',f.cep)
+        +lin('E-mail',f.email)+lin('WhatsApp',f.whatsapp)+lin('Gestor',f.gestor?'Sim':'')
+        +'</div>';
+      return '<div class="fcard" style="flex-direction:column;align-items:stretch;padding:0;overflow:hidden">'
+        +'<div style="display:flex;align-items:center;gap:10px;padding:12px 14px">'
+        +'<button class="cexp" data-id="'+f.id+'" style="background:none;border:none;display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;text-align:left;color:inherit;padding:0">'
+        +temFoto+'<div style="flex:1"><div class="fn">'+f.nome+'</div><div style="font-size:12px;color:var(--t2)">'+(f.cargo||'-')+' '+badgeFace+'</div></div>'
+        +'<span class="cseta" id="cseta-'+f.id+'" style="color:var(--t2);font-size:12px">&#9656;</span></button>'
+        +'<button class="bcam" data-id="'+f.id+'" title="Cadastrar rosto">&#128247;</button>'
+        +'<button class="bedt" data-id="'+f.id+'" title="Editar">&#9998;</button>'
+        +'<button class="brm" data-id="'+f.id+'" title="Remover">&#10005;</button>'
+        +'</div>'+det+'</div>';
     }).join('');
+    document.querySelectorAll('#adml .cexp').forEach(function(btn){btn.addEventListener('click',function(){var d=document.getElementById('cdet-'+btn.dataset.id);var s=document.getElementById('cseta-'+btn.dataset.id);if(d){var ab=d.style.display==='none';d.style.display=ab?'block':'none';if(s)s.innerHTML=ab?'&#9662;':'&#9656;';}});});
     document.querySelectorAll('#adml .brm').forEach(function(btn){btn.addEventListener('click',function(){rmF(btn.dataset.id);});});
     document.querySelectorAll('#adml .bedt').forEach(function(btn){btn.addEventListener('click',function(){abrirEdit(btn.dataset.id);});});
     document.querySelectorAll('#adml .bcam').forEach(function(btn){btn.addEventListener('click',function(){cadastrarRosto(btn.dataset.id);});});
@@ -347,11 +362,12 @@ function abrirEdit(id){
   var f=(_funcs||[]).find(function(x){return x.id===id;});
   if(!f)return;
   feditId=id;
-  document.getElementById('enome').value=f.nome;
-  document.getElementById('ecargo').value=f.cargo||'';
-  document.getElementById('eemail').value=f.email||'';
-  document.getElementById('ewhatsapp').value=f.whatsapp||'';
-  document.getElementById('ewppkey').value=f.wppKey||'';
+  function sv(eid,val){var e=document.getElementById(eid);if(e)e.value=val||'';}
+  sv('enome',f.nome);sv('ecargo',f.cargo);sv('eemail',f.email);
+  sv('ewhatsapp',f.whatsapp);sv('ewppkey',f.wppKey);
+  sv('ecpf',f.cpf);sv('erg',f.rg);sv('edatanasc',f.dataNasc);sv('edataadm',f.dataAdmissao);
+  sv('eendereco',f.endereco);sv('ecidade',f.cidade);sv('ecep',f.cep);
+  var eg=document.getElementById('egestor');if(eg)eg.checked=!!f.gestor;
   document.getElementById('edit-box').style.display='block';
   document.getElementById('enome').focus();
 }
@@ -362,9 +378,12 @@ function salvarEdit(){
   if(!nome){toast('Informe o nome',1);return;}
   var f=(_funcs||[]).find(function(x){return x.id===feditId;});
   if(!f)return;
-  f.nome=nome;f.cargo=cargo;f.email=document.getElementById('eemail').value.trim();
-  f.whatsapp=document.getElementById('ewhatsapp').value.trim();
-  f.wppKey=document.getElementById('ewppkey').value.trim();
+  function gv(eid){var e=document.getElementById(eid);return e?e.value.trim():'';}
+  f.nome=nome;f.cargo=cargo;f.email=gv('eemail');
+  f.whatsapp=gv('ewhatsapp');f.wppKey=gv('ewppkey');
+  f.cpf=gv('ecpf');f.rg=gv('erg');f.dataNasc=gv('edatanasc');f.dataAdmissao=gv('edataadm');
+  f.endereco=gv('eendereco');f.cidade=gv('ecidade');f.cep=gv('ecep');
+  var eg=document.getElementById('egestor');if(eg)f.gestor=eg.checked;
   sincronizarColaboradores();fecharEdit();radAdm();rl();toast('Atualizado!');
 }
 function testarWpp(p,k){var ph=(document.getElementById(p)||{}).value||'',ak=(document.getElementById(k)||{}).value||'';if(!ph||!ak){toast('Preencha WhatsApp e API Key',1);return;}fetch('https://api.callmebot.com/whatsapp.php?phone='+ph+'&text=Teste+-+Ponto+Alden+Caps&apikey='+ak,{mode:'no-cors'}).then(function(r){return r.text();}).then(function(t){toast(t.toLowerCase().includes('queued')?'Mensagem enviada!':'Enviado! Confira o WhatsApp.',0);}).catch(function(){toast('Erro. Verifique os dados.',1);});}
