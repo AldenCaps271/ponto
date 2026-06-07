@@ -267,7 +267,7 @@ function msgPonto(tipo){
   ov.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:9999;';
   var bx=document.createElement('div');
   bx.style.cssText='background:#1a1a0f;border:2px solid #C9A84C;border-radius:14px;padding:36px 44px;text-align:center;max-width:300px;width:85%;';
-  bx.innerHTML='<p style="color:#C9A84C;font-size:1em;font-weight:bold;margin:0 0 6px">'+p[0]+'</p><p style="color:#e7e2d4;font-size:1.35em;font-weight:600;margin:0 0 28px">'+p[1]+'</p><button style="background:#C9A84C;color:#111;border:none;padding:11px 40px;border-radius:8px;font-size:1.05em;font-weight:bold;cursor:pointer">OK</button>';
+  bx.innerHTML='<p style="color:#C9A84C;font-size:1em;font-weight:bold;margin:0 0 6px">'+p[0]+'</p><p style="color:#fff;font-size:1.15em;font-weight:700;margin:0 0 4px">'+(fa?fa.nome:'')+'</p><p style="color:#e7e2d4;font-size:1.2em;font-weight:500;margin:0 0 28px">'+p[1]+'</p><button style="background:#C9A84C;color:#111;border:none;padding:11px 40px;border-radius:8px;font-size:1.05em;font-weight:bold;cursor:pointer">OK</button>';
   ov.appendChild(bx);document.body.appendChild(ov);
   bx.querySelector('button').addEventListener('click',function(){ov.remove();});
 }
