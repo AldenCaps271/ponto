@@ -314,7 +314,21 @@ function abaF(){
 function abaC(){
   document.getElementById('tab-c').classList.add('on');document.getElementById('tab-f').classList.remove('on');
   document.getElementById('pc').classList.add('on');document.getElementById('pf').classList.remove('on');
-  document.getElementById('csetor').value=CFG.get().setor||'';
+  preencherConfig(CFG.get());
+  apiGet({acao:'getConfig'}, function(r){
+    if(r&&r.ok&&r.config&&Object.keys(r.config).length){
+      var merged=Object.assign({}, CFG.get(), r.config);
+      CFG.set(merged);
+      preencherConfig(merged);
+    }
+  });
+}
+function preencherConfig(c){
+  c=c||{};
+  function sv(id,val){var e=document.getElementById(id);if(e)e.value=val||'';}
+  sv('csetor',c.setor);sv('ccnpj',c.cnpj);sv('crazao',c.razaoSocial);
+  sv('cendereco',c.endereco);sv('ccidade',c.cidade);sv('ccep',c.cep);
+  sv('cemail',c.email);sv('ctelefone',c.telefone);sv('cwhatsapp',c.whatsapp);sv('cwppkey',c.wppKey);
 }
 
 function radAdm(){
@@ -442,6 +456,7 @@ cfg.telefone=document.getElementById('ctelefone')?.value.trim()||cfg.telefone||'
 cfg.whatsapp=document.getElementById('cwhatsapp')?.value.trim()||cfg.whatsapp||'';
 cfg.wppKey=document.getElementById('cwppkey')?.value.trim()||cfg.wppKey||'';
 CFG.set(cfg);
+apiPost({acao:'salvarConfig',config:cfg});
 if(document.getElementById('bsetor'))document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
 if(document.getElementById('adm-setor'))document.getElementById('adm-setor').textContent=cfg.setor;
 toast('Configurações salvas!');
