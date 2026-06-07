@@ -206,8 +206,7 @@ bx.innerHTML='<div style="font-size:48px;margin-bottom:12px">✅</div><p style="
 ov.appendChild(bx);document.body.appendChild(ov);
 var gestor=(_funcs||[]).find(function(x){return x.gestor;});
 if(gestor&&gestor.whatsapp&&gestor.wppKey){
-var msg=encodeURIComponent('⚠️ Alden Caps
-'+f.nome+' recadastrou biometria em '+new Date().toLocaleString('pt-BR'));
+var msg=encodeURIComponent('\u26a0\ufe0f Alden Caps\n'+f.nome+' recadastrou biometria em '+new Date().toLocaleString('pt-BR'));
 fetch('https://api.callmebot.com/whatsapp.php?phone='+gestor.whatsapp+'&text='+msg+'&apikey='+gestor.wppKey,{mode:'no-cors'}).catch(function(){});
 }
 bx.querySelector('button').addEventListener('click',function(){ov.remove();ap(f.id);});
