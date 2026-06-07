@@ -368,10 +368,14 @@ function abrirEdit(id){
   sv('ecpf',f.cpf);sv('erg',f.rg);sv('edatanasc',f.dataNasc);sv('edataadm',f.dataAdmissao);
   sv('eendereco',f.endereco);sv('ecidade',f.cidade);sv('ecep',f.cep);
   var eg=document.getElementById('egestor');if(eg)eg.checked=!!f.gestor;
-  document.getElementById('edit-box').style.display='block';
+  var _eb=document.getElementById('edit-box');
+  var _card=document.querySelector('#adml .fcard [data-id="'+id+'"]');
+  _card=_card?_card.closest('.fcard'):null;
+  if(_card){_card.appendChild(_eb);}
+  _eb.style.display='block';
   document.getElementById('enome').focus();
 }
-function fecharEdit(){feditId=null;document.getElementById('edit-box').style.display='none';}
+function fecharEdit(){feditId=null;var _eb=document.getElementById('edit-box');if(_eb){_eb.style.display='none';var _pf=document.getElementById('pf');var _adml=document.getElementById('adml');if(_pf&&_adml&&_eb.parentElement!==_pf){_adml.insertAdjacentElement('afterend',_eb);}}}
 function salvarEdit(){
   if(!feditId)return;
   var nome=document.getElementById('enome').value.trim(),cargo=document.getElementById('ecargo').value.trim();
@@ -517,6 +521,7 @@ window.addEventListener('DOMContentLoaded',function(){
   document.getElementById('tab-c').addEventListener('click',abaC);
   document.getElementById('btn-add').addEventListener('click',addF);document.getElementById('btn-test-wpp-edit')?.addEventListener('click',function(){testarWpp('ewhatsapp','ewppkey');});document.getElementById('btn-test-wpp-add')?.addEventListener('click',function(){testarWpp('fwhatsapp','fwppkey');});
   document.getElementById('btn-salvarc').addEventListener('click',salvarC);
+document.getElementById('btn-salvar-empresa')?.addEventListener('click',salvarC);
 document.getElementById('btn-salvar-senha-acesso')?.addEventListener('click',alterarSenhaAcesso);
   document.getElementById('btn-relatorio').addEventListener('click',abrirRelatorio);
   document.getElementById('btn-salvar-edit').addEventListener('click',salvarEdit);
