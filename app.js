@@ -1,4 +1,4 @@
-// v2.1
+// v2.2
 var SU='https://script.google.com/macros/s/AKfycbxy6lC0sg4vdwuyBw7BnAE4adYZbSd4AN-wvkTsWgheNArxpd7hczODPfjg1AjTAWXT/exec';
 
 // Config local (preferencias de UI apenas)
