@@ -112,18 +112,33 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 </div>
 <script>
 (function(){
-  var SENHA_PONTO = 'alden2026';
-  // Decodificar para evitar que o valor fique trivialmente visível no HTML
-  SENHA_PONTO = decodeURIComponent(SENHA_PONTO);
-  
+  var SENHA_INICIAL = 'Alden141927';
+  var senhaServidor = null;
+  // Busca a senha de acesso no servidor (com timeout curto pra nao travar a tela)
+  (function(){
+    try{
+      var ctrl = new AbortController();
+      var to = setTimeout(function(){ctrl.abort();}, 4000);
+      fetch('https://script.google.com/macros/s/AKfycbxy6lC0sg4vdwuyBw7BnAE4adYZbSd4AN-wvkTsWgheNArxpd7hczODPfjg1AjTAWXT/exec?acao=getConfig&t='+Date.now(), {signal:ctrl.signal})
+        .then(function(r){return r.json();})
+        .then(function(d){ clearTimeout(to); if(d&&d.ok&&d.config&&d.config.senhaAcesso){ senhaServidor=d.config.senhaAcesso; } })
+        .catch(function(){});
+    }catch(e){}
+  })();
+  function senhasValidas(){
+    var arr=[SENHA_INICIAL];
+    if(senhaServidor) arr.push(senhaServidor);
+    var loc=localStorage.getItem('ponto_acesso_senha'); if(loc) arr.push(loc);
+    return arr;
+  }
   function liberarAcesso(){
     localStorage.setItem('ponto_acesso','1');
     document.getElementById('tela-senha').style.display='none';
   }
-  
   function verificarAcesso(){
     var v = document.getElementById('senha-input').value;
-    if(v === SENHA_PONTO){
+    if(senhasValidas().indexOf(v) >= 0){
+      localStorage.setItem('ponto_acesso_senha', v);
       liberarAcesso();
     } else {
       document.getElementById('senha-erro').style.display='block';
@@ -294,7 +309,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 <script>
 window.addEventListener('load', function(){
   var btnReg = document.getElementById('btn-registrar-ponto');
