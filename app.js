@@ -466,7 +466,9 @@ var nova=document.getElementById('csenha-acesso')?.value.trim();
 var conf=document.getElementById('csenha-acesso2')?.value.trim();
 if(!nova||nova.length<4){toast('Mínimo 4 caracteres',1);return;}
 if(nova!==conf){toast('As senhas não conferem',1);return;}
+var cfg=CFG.get();cfg.senhaAcesso=nova;CFG.set(cfg);
 localStorage.setItem('ponto_acesso_senha',nova);
+apiPost({acao:'salvarConfig',config:cfg});
 document.getElementById('csenha-acesso').value='';
 document.getElementById('csenha-acesso2').value='';
 toast('Senha de acesso alterada!');
@@ -528,6 +530,14 @@ var w=window.open('','_blank');w.document.write(html);w.document.close();
 }
 window.addEventListener('DOMContentLoaded',function(){
   var cfg=CFG.get();
+  apiGet({acao:'getConfig'}, function(r){
+    if(r&&r.ok&&r.config&&Object.keys(r.config).length){
+      var m=Object.assign({}, CFG.get(), r.config);
+      CFG.set(m);
+      if(r.config.senhaAcesso) localStorage.setItem('ponto_acesso_senha', r.config.senhaAcesso);
+      if(document.getElementById('bsetor')) document.getElementById('bsetor').textContent=(m.setor||'').toUpperCase();
+    }
+  });
   document.getElementById('bsetor').textContent=cfg.setor.toUpperCase();
   document.getElementById('adm-setor').textContent=cfg.setor;
   carregarFuncs(function(){rl();});
