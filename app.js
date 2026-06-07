@@ -293,6 +293,9 @@ function atBotoes(){
 
 // ===== ADMIN =====
 function abrirAdmin(){
+  var _mod=document.getElementById('mod');
+  if(_mod.parentElement!==document.body)document.body.appendChild(_mod);
+  _mod.style.zIndex='99999';
   document.getElementById('merr').style.display='none';
   document.getElementById('msenha').value='';
   document.getElementById('mod').style.display='flex';
