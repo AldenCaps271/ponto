@@ -488,10 +488,13 @@ gerarRelatorioFolha(data.folha,nM[mes]+' '+ano);
 }
 function gerarRelatorioFolha(folha,tMes){
 var fotoDe={};(_funcs||[]).forEach(function(f){fotoDe[f.nome]=f.foto;});
+var _emp=CFG.get()||{};
+var _logoUrl='https://aldencaps271.github.io/ponto/Logo%20Novo.png';
 var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Relatorio '+tMes+'</title><style>';
 html+='*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;background:#fff;color:#333;font-size:11px}';
 html+='.pagina{width:210mm;min-height:297mm;padding:10mm 12mm;page-break-after:always;display:flex;flex-direction:column}.pagina:last-of-type{page-break-after:avoid}';
 html+='.topo{text-align:center;margin-bottom:6px;border-bottom:2px solid #C9A84C;padding-bottom:6px}.topo h1{color:#C9A84C;font-size:16px;margin:0}.topo p{color:#888;font-size:10px;margin:2px 0}';
+html+='.cabec{display:flex;align-items:center;gap:14px;justify-content:flex-start;text-align:left}.logo-rel{width:60px;height:60px;object-fit:cover;border-radius:50%;border:2px solid #C9A84C;flex-shrink:0}.emp-info{flex:1}.emp-info h1{font-size:15px;margin:0}.emp-info p{margin:1px 0}.emp-info .periodo{color:#C9A84C;font-weight:bold;font-size:11px;margin-top:3px}';
 html+='.info-func{display:flex;align-items:center;gap:10px;background:#1c1a10;color:#C9A84C;padding:8px 10px;border-radius:6px;margin-bottom:6px}';
 html+='.info-func img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #C9A84C;flex-shrink:0}.info-func .nome{font-size:13px;font-weight:bold}.info-func .cargo{font-size:10px;color:#e8c86a}';
 html+='table{width:100%;border-collapse:collapse;flex:1}thead tr{background:#2d2a1a}thead th{color:#C9A84C;padding:5px 4px;text-align:center;font-size:10px;border:1px solid #444}';
@@ -502,7 +505,10 @@ html+='.assinaturas{display:grid;grid-template-columns:1fr 1fr;gap:40px;padding:
 html+='@media print{body{margin:0}.pagina{padding:8mm 10mm}button{display:none}}</style></head><body>';
 Object.keys(folha).forEach(function(nome){
 var d=folha[nome];var foto=fotoDe[nome];var fotoTag=foto?'<img src="'+foto+'" />':'';
-html+='<div class="pagina"><div class="topo"><h1>ALDEN CAPS - FOLHA DE PONTO</h1><p>Periodo: '+tMes+'</p></div>';
+var _razao=_emp.razaoSocial||_emp.setor||'ALDEN CAPS';
+var _cnpjL=_emp.cnpj?'<p>CNPJ: '+_emp.cnpj+'</p>':'';
+var _endL=_emp.endereco?'<p>'+_emp.endereco+(_emp.cidade?' - '+_emp.cidade:'')+(_emp.cep?' - CEP '+_emp.cep:'')+'</p>':'';
+html+='<div class="pagina"><div class="topo"><div class="cabec"><img src="'+_logoUrl+'" class="logo-rel" onerror="this.style.display=\'none\'" /><div class="emp-info"><h1>'+_razao+'</h1>'+_cnpjL+_endL+'<p class="periodo">FOLHA DE PONTO - Periodo: '+tMes+'</p></div></div></div>';
 html+='<div class="info-func">'+fotoTag+'<div><div class="nome">'+nome+'</div><div class="cargo">'+(d.cargo||'Colaborador')+'</div></div></div>';
 html+='<table><thead><tr><th style="width:70px">Data</th><th style="width:40px">Dia</th><th>Entrada</th><th>S.Almoco</th><th>Retorno</th><th>Saida</th><th>Trabalhado</th><th>Atraso</th><th>H.Extras</th><th style="width:28px">%</th></tr></thead><tbody>';
 d.linhas.forEach(function(L){
