@@ -53,6 +53,8 @@ function carregarFaceApi(cb){
 function abrirCamera(modo,onCaptura){
   modoCamera=modo;
   var modal=document.getElementById('cam-modal');
+  if(modal.parentElement!==document.body)document.body.appendChild(modal);
+  modal.style.zIndex='99999';
   var status=document.getElementById('cam-status');
   var btnCap=document.getElementById('cam-btn');
   modal.style.display='flex';
