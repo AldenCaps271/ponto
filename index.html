@@ -162,8 +162,8 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 <div id="sem-bio">
   <div class="bio-aviso">
     <div class="ico">&#9888;&#65039;</div>
-    <div class="titulo">Sua Biometria ainda não foi cadastrada.</div>
-    <div class="sub">Fale com seu Gestor para realizar o cadastro facial.<br>Selecione seu nome abaixo para registrar o ponto.</div>
+    <div class="titulo bio-titulo">Sua biometria não foi reconhecida. Clique no seu nome para cadastrar uma nova.</div>
+    <div class="sub">Após 2 tentativas sem reconhecimento, selecione seu nome abaixo.</div>
   </div>
   <div class="bio-lista-titulo">Selecione seu nome</div>
   <div class="bio-lista" id="bio-lista"></div>
@@ -216,27 +216,55 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
         <button class="bs" id="btn-test-wpp-edit" class="bcam" style="margin-bottom:6px;width:100%">&#128242; Testar WhatsApp</button><button id="btn-salvar-edit">Salvar alteracoes</button>
         <button class="bs2" id="btn-cancelar-edit">Cancelar</button>
       </div>
-      <div class="fadd">
-        <h4>+ Adicionar colaborador</h4>
-        <div class="fr"><input type="text" id="fnome" placeholder="Nome completo"><input type="text" id="fcargo" placeholder="Cargo (opcional)"></div><div class="fr" style="grid-template-columns:1fr"><input type="email" id="femail" placeholder="E-mail do colaborador"></div>
-        <button class="bs" id="fwhatsapp" type="tel" placeholder="WhatsApp (5511999...)"></div><button class="bcam" id="btn-test-wpp-add" style="margin-bottom:6px;width:100%">&#128242; Testar WhatsApp</button><button id="btn-add">Salvar</button>
+      <button class="bs2" onclick="toggleNovoColab()" style="margin-top:12px">+ Cadastrar novo colaborador</button>
+      <div class="fadd" id="form-novo-colab" style="display:none;margin-top:8px">
+        <h4>Novo Colaborador</h4>
+        <div class="fr"><input type="text" id="fnome" placeholder="Nome completo *"><input type="text" id="fcargo" placeholder="Cargo *"></div>
+        <div class="fr"><input type="text" id="fcpf" placeholder="CPF"><input type="text" id="frg" placeholder="RG"></div>
+        <div class="fr"><input type="date" id="fdatanasc"><input type="date" id="fdataadm"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:4px">
+          <label style="font-size:11px;color:var(--t2)">Data de nascimento</label>
+          <label style="font-size:11px;color:var(--t2)">Data de admissão *</label>
+        </div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="fendereco" placeholder="Endereço (rua, nº, bairro)"></div>
+        <div class="fr"><input type="text" id="fcidade" placeholder="Cidade / UF"><input type="text" id="fcep" placeholder="CEP"></div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="email" id="femail" placeholder="E-mail"></div>
+        <div class="fr"><input type="tel" id="fwhatsapp" placeholder="WhatsApp (5511999999999)"><input type="text" id="fwppkey" placeholder="API Key CallMeBot"></div>
+        <div class="fr" style="grid-template-columns:1fr">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);cursor:pointer;padding:8px 0">
+            <input type="checkbox" id="fgestor" style="width:16px;height:16px;accent-color:var(--g)">
+            Marcar como Gestor (receberá notificações de recadastro)
+          </label>
+        </div>
+        <button class="bcam" id="btn-test-wpp-add" style="margin-bottom:6px;width:100%">&#128242; Testar WhatsApp</button>
+        <button class="bs" id="btn-add">Salvar colaborador</button>
+        <button class="bs2" onclick="toggleNovoColab()" style="margin-top:6px">Cancelar</button>
       </div>
-      <button class="btn-rel" id="btn-relatorio">&#128438; Gerar Relatorio Mensal</button>
+<button class="btn-rel" id="btn-relatorio">&#128438; Gerar Relatorio Mensal</button>
     </div>
     <div class="pan" id="pc">
       <div class="fadd" style="margin-top:0">
-        <h4>Configuracoes</h4>
-        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="csetor" placeholder="Nome do setor"></div>
-        <div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha" placeholder="Nova senha (min 4 chars)"></div>
-        <button class="bs" id="btn-salvarc">Salvar</button>
+        <h4>Dados da Empresa</h4>
+        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="csetor" placeholder="Nome do setor / empresa"></div>
+        <div class="fr"><input type="text" id="ccnpj" placeholder="CNPJ"><input type="text" id="crazao" placeholder="Razão Social"></div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="cendereco" placeholder="Endereço completo"></div>
+        <div class="fr"><input type="text" id="ccidade" placeholder="Cidade / UF"><input type="text" id="ccep" placeholder="CEP"></div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="email" id="cemail" placeholder="E-mail da empresa"></div>
+        <div class="fr"><input type="tel" id="ctelefone" placeholder="Telefone fixo"><input type="tel" id="cwhatsapp" placeholder="WhatsApp da empresa"></div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="text" id="cwppkey" placeholder="API Key CallMeBot"></div>
       </div>
       <div class="fadd" style="margin-top:10px">
-        <h4 style="color:#f09595">Zona de Perigo</h4>
-        <button class="bs" style="background:#A32D2D;color:#fff;margin-top:0" id="btn-reset">Apagar todos os dados</button>
+        <h4>Senha de Acesso ao Sistema</h4>
+        <div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha-acesso" placeholder="Nova senha de acesso"></div>
+        <div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha-acesso2" placeholder="Confirmar nova senha"></div>
+        <button class="bs" id="btn-salvar-senha-acesso">Alterar senha de acesso</button>
+      </div>
+      <div class="fadd" style="margin-top:10px">
+        <h4>Senha do Painel Admin</h4>
+        <div class="fr" style="grid-template-columns:1fr"><input type="password" id="csenha" placeholder="Nova senha admin (mín. 4 chars)"></div>
+        <button class="bs" id="btn-salvarc">Salvar configurações</button>
       </div>
     </div>
-  </div>
-</div>
 
 <div id="cam-modal">
   <div style="position:relative;display:flex;align-items:center;justify-content:center">
