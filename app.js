@@ -477,16 +477,27 @@ toast('Senha de acesso alterada!');
 
 // ===== RELATORIO =====
 function abrirRelatorio(){
-var hoje=new Date(),mes=hoje.getMonth(),ano=hoje.getFullYear();
 var nM=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var hoje=new Date();
+var esc=prompt('Relatorio de qual periodo?\n\n1 = Mes atual ('+nM[hoje.getMonth()]+'/'+hoje.getFullYear()+')\n2 = Escolher mes\n3 = Todos os meses\n\nDigite 1, 2 ou 3:','1');
+if(esc===null) return;
+esc=String(esc).trim();
+var modo='mes', mes=hoje.getMonth()+1, ano=hoje.getFullYear();
+if(esc==='3'){ modo='tudo'; }
+else if(esc==='2'){
+  var mm=prompt('Digite o mes e ano (MM/AAAA):', ('0'+(hoje.getMonth()+1)).slice(-2)+'/'+hoje.getFullYear());
+  if(mm===null) return;
+  var pm=String(mm).split('/');
+  mes=parseInt(pm[0],10); ano=parseInt(pm[1],10);
+  if(!mes||!ano||mes<1||mes>12){ toast('Data invalida',1); return; }
+}
 toast('Gerando relatorio, aguarde...');
-carregarFuncs(function(funcs){
-if(!funcs.length){toast('Nenhum colaborador cadastrado',1);return;}
-apiGet({acao:'getFolhaMes',mes:mes,ano:ano},function(data){
-if(!data.ok){toast('Erro ao buscar dados da planilha',1);return;}
-gerarRelatorioFolha(data.folha,nM[mes]+' '+ano);
-},function(){toast('Erro ao buscar dados da planilha',1);});
-});
+apiGet({acao:'getRelatorioHtml',mes:mes,ano:ano,modo:modo},function(data){
+  if(!data||!data.ok||!data.html){ toast('Erro ao gerar relatorio',1); return; }
+  var w=window.open('','_blank');
+  if(!w){ toast('Permita pop-ups para ver o relatorio',1); return; }
+  w.document.open(); w.document.write(data.html); w.document.close();
+},function(){ toast('Erro ao gerar relatorio',1); });
 }
 function gerarRelatorioFolha(folha,tMes){
 var fotoDe={};(_funcs||[]).forEach(function(f){fotoDe[f.nome]=f.foto;});
