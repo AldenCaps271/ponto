@@ -95,7 +95,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tok{background:var(--g);color:var(--p)}.terr{background:#A32D2D;color:#f0ede6}
 .empty{text-align:center;padding:2rem;color:var(--t2);font-size:14px}
-.btn-home{display:block;width:100%;padding:14px;margin-top:18px;background:#C9A84C;border:none;border-radius:12px;color:#111;font-size:1.05em;font-weight:700;cursor:pointer;text-align:center;letter-spacing:.04em;}</style>
+.btn-home{display:block;width:100%;padding:14px;margin-top:18px;background:#C9A84C;border:none;border-radius:12px;color:#111;font-size:1.05em;font-weight:700;cursor:pointer;text-align:center;letter-spacing:.04em;}#saldo-banco{margin:10px 14px 0;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;font-weight:500;border:1px solid var(--g);background:rgba(201,168,76,.1);color:var(--t)}#saldo-banco.alerta{border-color:#e0a800;background:rgba(224,168,0,.12)}#saldo-banco.positivo{border-color:#2e9e5b;background:rgba(46,158,91,.12)}</style>
 </head>
 <body>
 <div id="tela-senha" style="position:fixed;inset:0;background:#1a1a2e;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
@@ -192,6 +192,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
     <div class="sy"><div class="dt da" id="sdot"></div><span id="stxt">-</span></div>
     
   </div>
+    <div id="saldo-banco" style="display:none"></div>
   <div class="pb">
     <div class="rh"><div class="rt" id="rel">00:00:00</div><div class="rd" id="red"></div></div>
     <div class="mg">
@@ -309,7 +310,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 <script>
 window.addEventListener('load', function(){
   var btnReg = document.getElementById('btn-registrar-ponto');
