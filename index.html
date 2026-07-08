@@ -95,7 +95,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .tok{background:var(--g);color:var(--p)}.terr{background:#A32D2D;color:#f0ede6}
 .empty{text-align:center;padding:2rem;color:var(--t2);font-size:14px}
-.btn-home{display:block;width:100%;padding:14px;margin-top:18px;background:#C9A84C;border:none;border-radius:12px;color:#111;font-size:1.05em;font-weight:700;cursor:pointer;text-align:center;letter-spacing:.04em;}#saldo-banco{margin:10px 14px 0;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;font-weight:500;border:1px solid var(--g);background:rgba(201,168,76,.1);color:var(--t)}#saldo-banco.alerta{border-color:#e0a800;background:rgba(224,168,0,.12)}#saldo-banco.positivo{border-color:#2e9e5b;background:rgba(46,158,91,.12)}</style>
+.btn-home{display:block;width:100%;padding:14px;margin-top:18px;background:#C9A84C;border:none;border-radius:12px;color:#111;font-size:1.05em;font-weight:700;cursor:pointer;text-align:center;letter-spacing:.04em;}#saldo-banco{margin:10px 14px 0;padding:12px 14px;border-radius:12px;font-size:13px;line-height:1.45;font-weight:500;border:1px solid var(--g);background:rgba(201,168,76,.1);color:var(--t)}#saldo-banco.alerta{border-color:#e0a800;background:rgba(224,168,0,.12)}#saldo-banco.positivo{border-color:#2e9e5b;background:rgba(46,158,91,.12)}.rel-sec{background:rgba(201,168,76,.06);border:1px solid var(--b);border-radius:12px;padding:14px;margin-bottom:12px}.rel-tit{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g);margin-bottom:10px}.rel-rad{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--t);padding:7px 0;cursor:pointer}.rel-rad input{width:17px;height:17px;accent-color:var(--g);cursor:pointer}.rel-month{width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--b);background:var(--p);color:var(--t);font-size:14px}#rel-colabs .rel-rad{border-bottom:1px solid rgba(201,168,76,.08)}</style>
 </head>
 <body>
 <div id="tela-senha" style="position:fixed;inset:0;background:#1a1a2e;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px">
@@ -109,6 +109,30 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
     Entrar
   </button>
   <p id="senha-erro" style="color:#e74c3c;font-family:sans-serif;margin:0;display:none">Senha incorreta</p>
+</div>
+<div class="s" id="tr" style="justify-content:flex-start">
+  <div class="hd">
+    <div class="hl">AC</div>
+    <div class="hi"><div class="hn">Gerar Relat&#243;rio</div><div class="hc">Selecione per&#237;odo e colaboradores</div></div>
+    <button class="bv" id="btn-voltar-rel">&#8592; Voltar</button>
+  </div>
+  <div class="ab">
+    <div class="rel-sec">
+      <div class="rel-tit">Per&#237;odo</div>
+      <label class="rel-rad"><input type="radio" name="rel-per" value="mes" checked> M&#234;s atual</label>
+      <label class="rel-rad"><input type="radio" name="rel-per" value="escolher"> Escolher m&#234;s</label>
+      <div id="rel-mesbox" style="display:none;padding:6px 0 2px 26px">
+        <input type="month" id="rel-mes" class="rel-month">
+      </div>
+      <label class="rel-rad"><input type="radio" name="rel-per" value="tudo"> Todos os meses</label>
+    </div>
+    <div class="rel-sec">
+      <div class="rel-tit">Colaboradores</div>
+      <label class="rel-rad" style="border-bottom:1px solid var(--b);padding-bottom:8px;margin-bottom:4px"><input type="checkbox" id="rel-todos" checked> <strong>Todos</strong></label>
+      <div id="rel-colabs"></div>
+    </div>
+    <button class="bs" id="btn-gerar-rel">&#128196; Gerar Relat&#243;rio</button>
+  </div>
 </div>
 <script>
 (function(){
@@ -310,7 +334,7 @@ html,body{height:100%;background:var(--p);color:var(--t);font-family:-apple-syst
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 <script>
 window.addEventListener('load', function(){
   var btnReg = document.getElementById('btn-registrar-ponto');
