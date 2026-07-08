@@ -488,27 +488,50 @@ toast('Senha de acesso alterada!');
 
 // ===== RELATORIO =====
 function abrirRelatorio(){
-var nM=['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-var hoje=new Date();
-var esc=prompt('Relatorio de qual periodo?\n\n1 = Mes atual ('+nM[hoje.getMonth()]+'/'+hoje.getFullYear()+')\n2 = Escolher mes\n3 = Todos os meses\n\nDigite 1, 2 ou 3:','1');
-if(esc===null) return;
-esc=String(esc).trim();
-var modo='mes', mes=hoje.getMonth()+1, ano=hoje.getFullYear();
-if(esc==='3'){ modo='tudo'; }
-else if(esc==='2'){
-  var mm=prompt('Digite o mes e ano (MM/AAAA):', ('0'+(hoje.getMonth()+1)).slice(-2)+'/'+hoje.getFullYear());
-  if(mm===null) return;
-  var pm=String(mm).split('/');
-  mes=parseInt(pm[0],10); ano=parseInt(pm[1],10);
-  if(!mes||!ano||mes<1||mes>12){ toast('Data invalida',1); return; }
+  ms('tr');
+  document.querySelector('input[name="rel-per"][value="mes"]').checked=true;
+  document.getElementById('rel-mesbox').style.display='none';
+  document.getElementById('rel-todos').checked=true;
+  var hoje=new Date();
+  var mi=document.getElementById('rel-mes'); if(mi){ mi.value=hoje.getFullYear()+'-'+('0'+(hoje.getMonth()+1)).slice(-2); }
+  var cont=document.getElementById('rel-colabs');
+  cont.innerHTML='<div class="empty" style="padding:8px">Carregando...</div>';
+  carregarFuncs(function(funcs){
+    if(!funcs.length){ cont.innerHTML='<div class="empty" style="padding:8px">Nenhum colaborador</div>'; return; }
+    cont.innerHTML=funcs.map(function(f){
+      return '<label class="rel-rad"><input type="checkbox" class="rel-cb" value="'+f.nome.replace(/"/g,'&quot;')+'" checked> '+f.nome+'</label>';
+    }).join('');
+    cont.querySelectorAll('.rel-cb').forEach(function(cb){ cb.addEventListener('change',relSyncTodos); });
+  });
 }
-toast('Gerando relatorio, aguarde...');
-apiGet({acao:'getRelatorioHtml',mes:mes,ano:ano,modo:modo},function(data){
-  if(!data||!data.ok||!data.html){ toast('Erro ao gerar relatorio',1); return; }
-  var w=window.open('','_blank');
-  if(!w){ toast('Permita pop-ups para ver o relatorio',1); return; }
-  w.document.open(); w.document.write(data.html); w.document.close();
-},function(){ toast('Erro ao gerar relatorio',1); });
+function relSyncTodos(){
+  var cbs=document.querySelectorAll('#rel-colabs .rel-cb');
+  var todos=document.getElementById('rel-todos');
+  var marcados=0; cbs.forEach(function(c){ if(c.checked) marcados++; });
+  todos.checked = (marcados===cbs.length && cbs.length>0);
+}
+function gerarRelatorioSelecionado(){
+  var per=document.querySelector('input[name="rel-per"]:checked').value;
+  var hoje=new Date();
+  var modo='mes', mes=hoje.getMonth()+1, ano=hoje.getFullYear();
+  if(per==='tudo'){ modo='tudo'; }
+  else if(per==='escolher'){
+    var v=document.getElementById('rel-mes').value;
+    if(!v){ toast('Escolha o mes',1); return; }
+    var pm=v.split('-'); ano=parseInt(pm[0],10); mes=parseInt(pm[1],10);
+  }
+  var nomes=[];
+  document.querySelectorAll('#rel-colabs .rel-cb').forEach(function(cb){ if(cb.checked) nomes.push(cb.value); });
+  if(!nomes.length){ toast('Selecione ao menos um colaborador',1); return; }
+  var total=document.querySelectorAll('#rel-colabs .rel-cb').length;
+  var nomesParam=(nomes.length===total)?'':nomes.join('||');
+  toast('Gerando relatorio, aguarde...');
+  apiGet({acao:'getRelatorioHtml',mes:mes,ano:ano,modo:modo,nomes:nomesParam},function(data){
+    if(!data||!data.ok||!data.html){ toast('Erro ao gerar relatorio',1); return; }
+    var w=window.open('','_blank');
+    if(!w){ toast('Permita pop-ups para ver o relatorio',1); return; }
+    w.document.open(); w.document.write(data.html); w.document.close();
+  },function(){ toast('Erro ao gerar relatorio',1); });
 }
 function gerarRelatorioFolha(folha,tMes){
 var fotoDe={};(_funcs||[]).forEach(function(f){fotoDe[f.nome]=f.foto;});
@@ -577,6 +600,10 @@ window.addEventListener('DOMContentLoaded',function(){
 document.getElementById('btn-salvar-empresa')?.addEventListener('click',salvarC);
 document.getElementById('btn-salvar-senha-acesso')?.addEventListener('click',alterarSenhaAcesso);
   document.getElementById('btn-relatorio').addEventListener('click',abrirRelatorio);
+  var _bvr=document.getElementById('btn-voltar-rel'); if(_bvr) _bvr.addEventListener('click',function(){ms('ta');abaF();});
+  var _bgr=document.getElementById('btn-gerar-rel'); if(_bgr) _bgr.addEventListener('click',gerarRelatorioSelecionado);
+  document.querySelectorAll('input[name="rel-per"]').forEach(function(r){ r.addEventListener('change',function(){ document.getElementById('rel-mesbox').style.display=(this.value==='escolher')?'block':'none'; }); });
+  var _rt=document.getElementById('rel-todos'); if(_rt) _rt.addEventListener('change',function(){ var ch=this.checked; document.querySelectorAll('#rel-colabs .rel-cb').forEach(function(cb){cb.checked=ch;}); });
   document.getElementById('btn-salvar-edit').addEventListener('click',salvarEdit);
   document.getElementById('btn-cancelar-edit').addEventListener('click',fecharEdit);
   document.getElementById('cam-fechar').addEventListener('click',fecharCamera);
