@@ -515,6 +515,7 @@ function gerarRelatorioSelecionado(){
   var hoje=new Date();
   var modo='mes', mes=hoje.getMonth()+1, ano=hoje.getFullYear();
   if(per==='tudo'){ modo='tudo'; }
+  else if(per==='anterior'){ mes=hoje.getMonth(); ano=hoje.getFullYear(); if(mes===0){ mes=12; ano=ano-1; } }
   else if(per==='escolher'){
     var v=document.getElementById('rel-mes').value;
     if(!v){ toast('Escolha o mes',1); return; }
@@ -525,13 +526,18 @@ function gerarRelatorioSelecionado(){
   if(!nomes.length){ toast('Selecione ao menos um colaborador',1); return; }
   var total=document.querySelectorAll('#rel-colabs .rel-cb').length;
   var nomesParam=(nomes.length===total)?'':nomes.join('||');
+  var _bg=document.getElementById('btn-gerar-rel');
+  var _bgTxt=_bg?_bg.innerHTML:'';
+  if(_bg){ _bg.disabled=true; _bg.innerHTML='&#9203; Gerando relat\u00f3rio, por favor aguarde...'; _bg.style.opacity='0.7'; }
+  function _bgReset(){ if(_bg){ _bg.disabled=false; _bg.innerHTML=_bgTxt; _bg.style.opacity='1'; } }
   toast('Gerando relatorio, aguarde...');
   apiGet({acao:'getRelatorioHtml',mes:mes,ano:ano,modo:modo,nomes:nomesParam},function(data){
+    _bgReset();
     if(!data||!data.ok||!data.html){ toast('Erro ao gerar relatorio',1); return; }
     var w=window.open('','_blank');
     if(!w){ toast('Permita pop-ups para ver o relatorio',1); return; }
     w.document.open(); w.document.write(data.html); w.document.close();
-  },function(){ toast('Erro ao gerar relatorio',1); });
+  },function(){ _bgReset(); toast('Erro ao gerar relatorio',1); });
 }
 function gerarRelatorioFolha(folha,tMes){
 var fotoDe={};(_funcs||[]).forEach(function(f){fotoDe[f.nome]=f.foto;});
